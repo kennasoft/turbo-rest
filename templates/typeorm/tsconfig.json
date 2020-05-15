@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "moduleResolution": "node",
+    "strict": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": false,
+    "strictPropertyInitialization": false,
+    "experimentalDecorators": true,
+    "outDir": "./dist",
+    "rootDir": "./server"
+  },
+  "exclude": ["./dist"]
+}
