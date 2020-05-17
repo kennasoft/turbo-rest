@@ -26,9 +26,13 @@ const program = new Commander.Command(packageJson.name)
     "database host from which you want to generate the api. Default is localhost",
     "localhost"
   )
-  .option("-p, port", "database port to connect to. Default is 3306", "3306")
   .option(
-    "-d --database <database-name>",
+    "-p, port <database-port>",
+    "database port to connect to. Default is 3306",
+    "3306"
+  )
+  .option(
+    "-d, --database <database-name>",
     "database name to generate entities from."
   )
   .option(
@@ -40,7 +44,11 @@ const program = new Commander.Command(packageJson.name)
     "the password for database user you want to connect with"
   )
   .option(
-    "-e, --engine",
+    "--skipTables <list-of-tables-to-skip>",
+    "comma-separated list of table names to be excluded"
+  )
+  .option(
+    "-e, --engine <database-engine>",
     `database engine to use. 
       Options are
         * mysql
@@ -94,23 +102,23 @@ async function run(): Promise<void> {
   const resolvedProjectPath = path.resolve(apiRoot);
   const projectName = path.basename(resolvedProjectPath);
 
-  const template = await prompts({
-    type: "select",
-    name: "value",
-    message: "Pick a template",
-    choices: [
-      { title: "Typeorm", value: "typeorm" },
-      { title: "Sequelize", value: "sequelize" },
-    ],
-  });
+  // const template = await prompts({
+  //   type: "select",
+  //   name: "value",
+  //   message: "Pick a template",
+  //   choices: [
+  //     { title: "Typeorm", value: "typeorm" },
+  //     { title: "Sequelize", value: "sequelize" },
+  //   ],
+  // });
 
-  if (!template.value) {
-    console.log();
-    console.log("Please specify the template");
-    process.exit(1);
-  }
+  // if (!template.value) {
+  //   console.log();
+  //   console.log("Please specify the template");
+  //   process.exit(1);
+  // }
+  const template = { value: "typeorm" };
   const npmConfig = require(`./templates/${template.value}/package.json`);
-  console.log(npmConfig);
 
   await generateApi({
     appPath: resolvedProjectPath,
@@ -119,11 +127,13 @@ async function run(): Promise<void> {
       port: program.port,
       database: program.database,
       user: program.username,
-      password: program.password,
+      pass: program.password,
       engine: program.engine,
+      skipTables: program.skipTables,
     },
     template: template.value,
     npmConfig,
+    language: program.lang,
   });
 }
 

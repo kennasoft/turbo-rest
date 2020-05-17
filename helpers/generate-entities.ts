@@ -12,65 +12,109 @@ export type DatabaseEngine =
   | "sqlite";
 
 export type TmgConfig = {
-  host: string;
-  port: string;
-  database: string;
-  user: string;
-  password: string;
-  engine: DatabaseEngine;
+  host?: string;
+  port?: string;
+  database?: string;
+  user?: string;
+  pass?: string;
+  engine?: DatabaseEngine;
+  skipTables?: string;
+};
+
+const makeEnvFile = (config: TmgConfig, root: string) => {
+  let envFile = `
+TYPEORM_CONNECTION=${config.engine}
+TYPEORM_HOST=${config.host}
+TYPEORM_USERNAME=${config.user}
+TYPEORM_PASSWORD=${config.pass}
+TYPEORM_DATABASE=${config.database}
+TYPEORM_PORT=${config.port}
+TYPEORM_SYNCHRONIZE=false
+TYPEORM_LOGGING=false
+TYPEORM_ENTITIES=./dist/lib/entities/*.js,./server/lib/entities/*.ts
+  `;
+
+  fs.writeFileSync(`${root}/.env`, envFile, "utf8");
 };
 
 export async function generateEntities(
   root: string,
-  {
-    host = "localhost",
-    port = "3306",
-    database,
-    engine = "mysql",
-    user,
-    password,
-  }: TmgConfig
-): Promise<void> {
+  config: TmgConfig
+): Promise<void | Record<string, string>> {
+  console.log(config);
   const args: string[] = ["typeorm-model-generator"];
   const entityPath = `${root}/server/lib`;
-  const envFile = `
-TYPEORM_CONNECTION=${engine}
-TYPEORM_HOST=${host}
-TYPEORM_USERNAME=${user}
-TYPEORM_PASSWORD=${password}
-TYPEORM_DATABASE=${database}
-TYPEORM_PORT=${port}
-TYPEORM_SYNCHRONIZE=false
-TYPEORM_LOGGING=false
-TYPEORM_ENTITIES=./dist/lib/entities/*.js,./server/lib/entities/*.ts
-`;
 
-  fs.writeFileSync(`${root}/.env`, envFile, "utf8");
+  const defaultFields: TmgConfig = {
+    host: "localhost",
+    port: "3306",
+    engine: "mysql",
+  };
+  const defaults = Object.keys(defaultFields);
+
+  const allEmpty = Object.keys(config)
+    .filter((c) => !defaults.includes(c))
+    .reduce((acc: boolean, curr: string) => {
+      acc = acc || !config[curr as keyof TmgConfig];
+      return acc;
+    }, false);
 
   await makeDir(entityPath);
-  args.push("-h", host);
-  args.push("-p", port);
-  args.push("-d", database);
-  args.push("-u", user);
-  args.push("-x", password);
-  args.push("-e", engine);
-  args.push("-o", entityPath);
-  // args.push("-pv", "public");
-  args.push("--generateConstructor", "true");
-  args.push("--defaultExport", "true");
-  args.push("--skipSchema", "true");
-  args.push("--noConfig", "true");
-  console.log(args);
+  if (!allEmpty) {
+    Object.keys(config).forEach((key) => {
+      const i = key as keyof TmgConfig;
+      if (config[i]) {
+        args.push(`--${i}`, config[i] as string);
+      } else {
+        if (i in defaultFields) {
+          args.push(`--${i}`, defaultFields[i] as string);
+        }
+      }
+    });
+    args.push("-o", entityPath);
+    args.push("--generateConstructor", "true");
+    args.push("--defaultExport", "true");
+    args.push("--skipSchema", "true");
+    // args.push("--noConfig", "true");
+  }
+
+  console.log(`spawning process npx with args [${args.join(" ")}]`);
 
   return new Promise((resolve, reject) => {
     const child = spawn("npx", args, {
       stdio: "inherit",
       env: { ...process.env, ADBLOCK: "1", DISABLE_OPENCOLLECTIVE: "1" },
     });
+    if (!child.pid) {
+      // if process was never started, reject promise
+      reject(`unable to spawn process npx with args: [${args.join(" ")}]`);
+    }
     child.on("close", (code) => {
       if (code !== 0) {
         reject({ command: `npx ${args.join(" ")}` });
         return;
+      } else {
+        try {
+          let conf: TmgConfig = Object.assign({}, config);
+          if (!conf.user && !conf.pass) {
+            const ormconfig = JSON.parse(
+              fs.readFileSync(`${entityPath}/ormconfig.json`, "utf8")
+            )[0];
+            conf = {
+              ...ormconfig,
+              engine: ormconfig.type,
+              user: ormconfig.username,
+              pass: ormconfig.password,
+            };
+          }
+          makeEnvFile(conf, root);
+        } catch (exc) {
+          const errorMsg = `unable to automatically generate your .env file. Open ${chalk.green(
+            `${root}/.env`
+          )} to update with appropriate values`;
+          console.log(errorMsg);
+          reject(errorMsg);
+        }
       }
       resolve();
     });

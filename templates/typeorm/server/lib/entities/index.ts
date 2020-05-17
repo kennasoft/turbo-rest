@@ -10,9 +10,12 @@ entityFiles
   .filter((f) => !excluded.includes(f))
   .forEach((f) => {
     const entityName = f.replace(/\.(t|j)s/, "");
-    defaultExport[
-      `${entityName[0].toUpperCase()}${entityName.substr(1)}`
-    ] = require(`./${entityName}`).default;
+    const exportName = `${entityName[0].toUpperCase()}${entityName.slice(1)}`;
+    defaultExport[exportName] = require(`./${entityName}`);
+    // use default or named export
+    defaultExport[exportName] =
+      defaultExport[exportName].default ||
+      defaultExport[exportName][exportName];
   });
 
 export default defaultExport;

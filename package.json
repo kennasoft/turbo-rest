@@ -17,21 +17,27 @@
     "build": "tsc && cp -R templates dist",
     "prerelease": "rimraf ./dist/",
     "release": "tsc && cp -R templates dist",
+    "test": "jest",
+    "test:watch": "yarn test -- --watch",
     "prepublish": "yarn release",
-    "start": "rimraf ./output && yarn build && npx ./dist/index.js output --template typeorm -d comicbooks_db -u root -x root"
+    "start": "rimraf ./output && yarn build && npx ./dist/index.js"
   },
   "author": "Ikenna Okonkwo<ikenna.okonkwo@gmail.com>",
   "license": "MIT",
   "devDependencies": {
     "@types/cross-spawn": "^6.0.1",
+    "@types/jest": "^25.2.2",
     "@types/prompts": "^2.0.8",
+    "@types/rimraf": "^3.0.0",
     "chalk": "^4.0.0",
     "commander": "^5.1.0",
     "cpy": "^8.1.0",
     "cross-spawn": "^7.0.2",
+    "jest": "^26.0.1",
     "make-dir": "^3.1.0",
     "prompts": "^2.3.2",
     "rimraf": "^3.0.2",
+    "ts-jest": "^26.0.0",
     "typescript": "^3.8.3"
   }
 }

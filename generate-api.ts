@@ -2,7 +2,6 @@ import chalk from "chalk";
 import cpy from "cpy";
 import fs from "fs";
 import makeDir from "make-dir";
-import os from "os";
 import path from "path";
 
 import { isFolderEmpty } from "./helpers/is-folder-empty";
@@ -10,13 +9,28 @@ import { TmgConfig, generateEntities } from "./helpers/generate-entities";
 import { shouldUseYarn } from "./helpers/should-use-yarn";
 import { getOnline } from "./helpers/is-online";
 import { install } from "./helpers/install";
+import { changeLanguage } from "./helpers/change-lang";
+
+export type JavascriptFlavor = "typescript" | "es2015" | "esnext";
 
 export type GenerateApiConfig = {
-  appPath: string;
+  appPath?: string;
   tmgConfig: TmgConfig; // typeorm-model-generator config
   template: string;
-  npmConfig: any; // object to hold sample package.json
+  npmConfig?: any; // object to hold sample package.json
+  language: JavascriptFlavor;
 };
+
+export enum EXIT_CODES {
+  NO_ERROR = 0,
+  UNKNOWN_ERROR = 1,
+  NO_APP_PATH_SPECIFIED = 4,
+  NO_DATABASE_CONFIG_SPECIFIED = 6,
+  UNSUPPORTED_LANGUAGE = 8,
+  LANGUAGE_CHANGE_FAILED = 10,
+  PROJECT_FOLDER_NOT_EMPTY = 12,
+  MODEL_GENERATOR_FAILED = 14,
+}
 
 const purple = chalk.hex("8a2be2");
 
@@ -25,20 +39,24 @@ export async function generateApi({
   tmgConfig,
   template,
   npmConfig,
+  language,
 }: GenerateApiConfig): Promise<void> {
-  const root = path.resolve(appPath);
+  if (!appPath) {
+    return process.exit(EXIT_CODES.NO_APP_PATH_SPECIFIED);
+    // throw new Error(`You must specify a project folder to Proceed`);
+  }
+  const root = path.resolve(appPath as string);
   const appName = path.basename(root);
   const packageJSON = npmConfig;
 
   await makeDir(root);
   if (!isFolderEmpty(root, appName)) {
-    process.exit(1);
+    return process.exit(EXIT_CODES.PROJECT_FOLDER_NOT_EMPTY);
   }
 
   const useYarn = shouldUseYarn();
   const isOnline = !useYarn || (await getOnline());
   const originalDirectory = process.cwd();
-  // console.log("originalDirectory:", originalDirectory);
 
   const displayedCommand = useYarn ? "yarn" : "npm";
   console.log(
@@ -46,9 +64,25 @@ export async function generateApi({
   );
   console.log();
 
-  await generateEntities(root, tmgConfig);
+  const entityFailed = await generateEntities(root, tmgConfig);
+
+  if (entityFailed) {
+    console.error(
+      `${chalk.red(
+        `Error generating entities at command: ${entityFailed.command}`
+      )}`
+    );
+    return process.exit(EXIT_CODES.MODEL_GENERATOR_FAILED);
+  }
 
   process.chdir(root);
+
+  packageJSON.name = appName;
+  fs.writeFileSync(
+    "package.json",
+    JSON.stringify(packageJSON, null, 2),
+    "utf8"
+  );
 
   console.log(
     `Installing ${Object.keys(packageJSON.dependencies)
@@ -65,31 +99,20 @@ export async function generateApi({
   await cpy("**", root, {
     parents: true,
     cwd: path.join(__dirname, "templates", template),
-    rename: (name) => {
-      switch (name) {
-        case "gitignore": {
-          return ".".concat(name);
-        }
-        // README.md is ignored by webpack-asset-relocator-loader used by ncc:
-        // https://github.com/zeit/webpack-asset-relocator-loader/blob/e9308683d47ff507253e37c9bcbb99474603192b/src/asset-relocator.js#L227
-        case "README-template.md": {
-          return "README.md";
-        }
-        default: {
-          return name;
-        }
-      }
-    },
+    filter: (file) => file.name !== "package.json",
   });
 
-  packageJSON.name = appName;
-  fs.writeFileSync("package.json", JSON.stringify(packageJSON), "utf8");
+  const langChangeFailed = await changeLanguage(language);
+  if (langChangeFailed) {
+    console.error(`${chalk.red(langChangeFailed)}`);
+    return process.exit(EXIT_CODES.LANGUAGE_CHANGE_FAILED);
+  }
 
   let cdpath: string;
   if (path.join(originalDirectory, appName) === appPath) {
     cdpath = appName;
   } else {
-    cdpath = appPath;
+    cdpath = appPath as string;
   }
 
   console.log(`${chalk.green("Success!")} Created ${appName} at ${appPath}`);
