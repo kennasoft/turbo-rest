@@ -17,12 +17,12 @@
     "restalize": "./dist/index.js"
   },
   "files": [
-    "dist/**"
+    "dist"
   ],
   "scripts": {
-    "build": "tsc && cp -R templates dist",
+    "build": "ncc build ./index.ts -o dist/ && cp -R ./templates ./dist",
     "prerelease": "rimraf ./dist/",
-    "release": "tsc && cp -R templates dist",
+    "release": "ncc build ./index.ts -o ./dist/ --minify --no-cache --no-source-map-register && cp -R ./templates ./dist",
     "test": "jest",
     "test:watch": "yarn test --watch",
     "prepare": "yarn release",
@@ -44,6 +44,7 @@
     "@types/jest": "^25.2.2",
     "@types/prompts": "^2.0.8",
     "@types/rimraf": "^3.0.0",
+    "@zeit/ncc": "^0.22.1",
     "jest": "^26.0.1",
     "ts-jest": "^26.0.0",
     "typescript": "^3.8.3"
