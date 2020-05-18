@@ -41,5 +41,25 @@ When invoked as above with no flags other than the directory name, the underlyin
 For a full description of usage type `npx restalize --help`, to see the below guide in your terminal:
 
 ```sh
-guide goes here
+Usage: restalize <project-folder> [options]
+
+Options:
+  -V, --version                            output the version number
+  -l, --lang <language>                    The language you want your generated api in. Options are: [typescript, es2015,     esnext] (default: "typescript")
+  -h, --host <database-host>               database host from which you want to generate the api. (default: "localhost")
+  -p, port <database-port>                 database port to connect to. (default: "3306")
+  -d, --database <database-name>           database name to generate entities from.
+  -u, --username <database-user>           the database user you want to connect with
+  -x, --password <database-user-password>  the password for database user you want to connect with
+  --skipTables <list-of-tables-to-skip>    comma-separated list of table names to be excluded
+  -e, --engine <database-engine>           database engine to use.
+        Options are
+          * mysql
+          * mssql
+          * postgres
+          * mariadb
+          * oracle
+          * sqlite
+       (default: "mysql")
+  --help                                   display help for command
 ```
