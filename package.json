@@ -1,6 +1,6 @@
 {
   "name": "restalize",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Robust REST API generator. Generates a full typescript express-js REST API project from just a relational database connection",
   "main": "index.js",
   "repository": {
@@ -17,15 +17,15 @@
     "restalize": "./dist/index.js"
   },
   "files": [
-    "dist"
+    "dist/**"
   ],
   "scripts": {
     "build": "tsc && cp -R templates dist",
     "prerelease": "rimraf ./dist/",
     "release": "tsc && cp -R templates dist",
     "test": "jest",
-    "test:watch": "yarn test -- --watch",
-    "prepublish": "yarn release",
+    "test:watch": "yarn test --watch",
+    "prepare": "yarn release",
     "start": "rimraf ./output && yarn build && npx ./dist/index.js"
   },
   "author": "Ikenna Okonkwo<ikenna.okonkwo@gmail.com>",
