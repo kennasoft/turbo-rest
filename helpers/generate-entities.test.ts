@@ -1,15 +1,17 @@
 import { TmgConfig, generateEntities } from "./generate-entities";
 import * as spawn from "cross-spawn";
 
-const crossSpawnMock = (
+function crossSpawnMock(
   command: string,
   args?: string[],
   options?: Record<string, any>
-) => ({
-  command,
-  args,
-  on: (event: string, callback: Function) => undefined,
-});
+) {
+  return {
+    command,
+    args,
+    on: (event: string, callback: Function) => undefined,
+  };
+}
 jest.mock("cross-spawn", () => ({ default: crossSpawnMock }));
 jest.mock("make-dir");
 jest.mock("fs");
