@@ -13,22 +13,6 @@ import { mapSQLTypeToSwagger } from "./type-mappings";
 // import Page from '../server/lib/entities/page'
 // import Publisher from '../server/lib/entities/publisher'
 
-export const defaultSwagger = {
-  swagger: "2.0",
-  info: {
-    description:
-      "This is an auto-generated API to access resources at http://localhost:3000/api",
-    title: "Restalize API",
-    version: "1.0.0",
-  },
-  host: "localhost:3000",
-  basePath: "/api",
-  tags: [],
-  schemes: ["http", "https"],
-  paths: {},
-  definitions: {},
-};
-
 const queue = {
   waiting: [] as any[],
   busy: false,
@@ -60,6 +44,38 @@ export default async function addToSwagger<Entity>(
       })
       .reduce((acc: any, curr: any) => ({ ...acc, ...curr }), {}),
   };
+
+  swaggerJSON.definitions[`${pluralize(entity.name, 1)}ResultList`] = {
+    type: "object",
+    properties: {
+      status: {
+        type: "string",
+        example: "success",
+      },
+      data: {
+        type: "object",
+        properties: {
+          total: {
+            type: "integer",
+            description: "Total number of records matching the criteria",
+            example: 100,
+          },
+          subtotal: {
+            type: "integer",
+            description: "Number of items returned based on _pageSize_ param",
+            example: 20,
+          },
+          rows: {
+            type: "array",
+            items: {
+              $ref: `#/definitions/${entity.name}`,
+            },
+          },
+        },
+      },
+    },
+  };
+
   if (entityMeta.ownRelations.length > 0) {
     entityMeta.ownRelations.map((rel: RelationMetadata) => {
       if (rel.isOneToMany || rel.isManyToMany) {
@@ -113,6 +129,39 @@ export default async function addToSwagger<Entity>(
     },
   ];
 
+  const getErrorObject = (code: number) => {
+    const resp = {
+      properties: {
+        status: {
+          type: "string",
+          example: "error",
+        },
+        message: {
+          type: "string",
+          example: "There was an error processing your request",
+        },
+      },
+    };
+    switch (code) {
+      case 500:
+        resp.properties.message.example =
+          "There was an error processing your request";
+        return resp;
+      case 400:
+        resp.properties.message.example = "Unauthorized access";
+        return resp;
+      case 404:
+        resp.properties.message.example = "Error: Record not found";
+        return resp;
+    }
+  };
+
+  const errorSchema = {
+    "400": getErrorObject(400),
+    "404": getErrorObject(404),
+    "500": getErrorObject(500),
+  };
+
   const restMethodProps = (
     entityMeta: EntityMetadata,
     paramSource = "query",
@@ -140,6 +189,24 @@ export default async function addToSwagger<Entity>(
         entity.name
       )} based on query parameters`,
       ...restMethodProps(entityMeta, "query", orderAndPagination),
+      responses: {
+        200: {
+          description: `returns an object with count summaries(total, subtotal) and a list of ${pluralize(
+            entity.name
+          )} (rows)`,
+          schema: {
+            $ref: `#/definitions/${pluralize(entity.name, 1)}ResultList`,
+          },
+        },
+        400: {
+          description: "Error: unauthorized access",
+          schema: errorSchema["400"],
+        },
+        404: {
+          description: `Error ${entity.name} not found`,
+          schema: errorSchema["404"],
+        },
+      },
     },
     post: {
       operationId: `create${pluralize(entity.name, 1)}`,
@@ -162,22 +229,68 @@ export default async function addToSwagger<Entity>(
           },
         },
       ],
+      responses: {
+        400: {
+          description: "Error: unauthorized access",
+          schema: errorSchema["400"],
+        },
+        404: {
+          description: `Error ${entity.name} not found`,
+          schema: errorSchema["404"],
+        },
+      },
     },
     put: {
+      operationId: `update${pluralize(entity.name)}`,
       description: `Updates a collection of ${pluralize(
         entity.name
       )} that match query parameters`,
-      ...restMethodProps(entityMeta),
+      ...restMethodProps(entityMeta, "query", [
+        {
+          name: "updateFields",
+          in: "body",
+          required: true,
+          description: `A JSON object containing the ${pluralize(
+            entityMeta.name,
+            1
+          )} fields to be updated`,
+          schema: {
+            $ref: `#/definitions/${entity.name}`,
+          },
+        },
+      ]),
+      responses: {
+        400: {
+          description: "Error: unauthorized access",
+          schema: errorSchema["400"],
+        },
+        404: {
+          description: `Error ${entity.name} not found`,
+          schema: errorSchema["404"],
+        },
+      },
     },
     delete: {
+      operationId: `delete${pluralize(entity.name)}`,
       description: `Deletes a collection of ${pluralize(
         entity.name
       )} based on query parameters. Use with caution as this action is irreversible`,
       ...restMethodProps(entityMeta),
+      responses: {
+        400: {
+          description: "Error: unauthorized access",
+          schema: errorSchema["400"],
+        },
+        404: {
+          description: `Error ${entity.name} not found`,
+          schema: errorSchema["404"],
+        },
+      },
     },
   };
   swaggerJSON.paths[`/${pluralize(entity.name)}/{id}`] = {
     get: {
+      operationId: `get${pluralize(entity.name, 1)}ById`,
       description: `Gets single instance of ${pluralize(
         entity.name,
         1
@@ -195,8 +308,19 @@ export default async function addToSwagger<Entity>(
           description: `The primary key field with which to lookup the ${entityMeta.name}`,
         },
       ],
+      responses: {
+        400: {
+          description: "Error: unauthorized access",
+          schema: errorSchema["400"],
+        },
+        404: {
+          description: `Error ${entity.name} not found`,
+          schema: errorSchema["404"],
+        },
+      },
     },
     put: {
+      operationId: `update${pluralize(entity.name, 1)}ById`,
       description: `Updates a single ${pluralize(
         entity.name,
         1
@@ -229,13 +353,24 @@ export default async function addToSwagger<Entity>(
           },
         },
       ],
+      responses: {
+        400: {
+          description: "Error: unauthorized access",
+          schema: errorSchema["400"],
+        },
+        404: {
+          description: `Error ${entity.name} not found`,
+          schema: errorSchema["404"],
+        },
+      },
     },
     delete: {
-      tags: [entity.name],
+      operationId: `delete${pluralize(entity.name, 1)}ById`,
       description: `Deletes specific instance of ${pluralize(
         entity.name,
         1
       )} that matches the id in the path. Use with caution as this action is irreversible`,
+      tags: [entity.name],
       produces: ["application/json"],
       parameters: [
         {
@@ -251,6 +386,16 @@ export default async function addToSwagger<Entity>(
           )} to be deleted.`,
         },
       ],
+      responses: {
+        400: {
+          description: "Error: unauthorized access",
+          schema: errorSchema["400"],
+        },
+        404: {
+          description: `Error ${entity.name} not found`,
+          schema: errorSchema["404"],
+        },
+      },
     },
   };
   queue.busy = false;
@@ -260,11 +405,11 @@ export default async function addToSwagger<Entity>(
     const swaggerFile = path.join(
       __dirname,
       "..",
-      "..",
+      "server",
       "docs",
       "swagger.json"
     );
-
+    db.close();
     fs.writeFile(
       `${swaggerFile}`,
       JSON.stringify(swaggerJSON, null, 2),
