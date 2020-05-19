@@ -55,9 +55,9 @@ export async function generateEntities(
   const allEmpty = Object.keys(config)
     .filter((c) => !defaults.includes(c))
     .reduce((acc: boolean, curr: string) => {
-      acc = acc || !config[curr as keyof TmgConfig];
+      acc = acc && !config[curr as keyof TmgConfig];
       return acc;
-    }, false);
+    }, true);
 
   await makeDir(entityPath);
   if (!allEmpty) {
