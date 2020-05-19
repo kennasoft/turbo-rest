@@ -55,11 +55,11 @@ const routes = function attachRoutes(server: express.Express) {
     server.put(entityApiPath, updateEntity(entities[e]));
     console.log(`    - DELETE ${entityApiPath}`);
     server.delete(entityApiPath, deleteEntity(entities[e]));
-    console.log();
     if (createSwagger) {
       console.log(`Generating Swagger documentation for ${e}`);
       addToSwagger(entities[e], swaggerJSON);
     }
+    console.log();
   });
 
   return server;

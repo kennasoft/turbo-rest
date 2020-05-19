@@ -260,11 +260,11 @@ export default async function addToSwagger<Entity>(
     const swaggerFile = path.join(
       __dirname,
       "..",
-      "server",
+      "..",
       "docs",
       "swagger.json"
     );
-    db.close();
+
     fs.writeFile(
       `${swaggerFile}`,
       JSON.stringify(swaggerJSON, null, 2),
