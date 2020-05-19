@@ -44,7 +44,6 @@ export default class ModelFetcher<Entity> extends Manager<Entity> {
     params = {} as Record<string, any>
   ): Promise<ApiListResponse<Entity>> {
     const db: Connection = await this.connect;
-    console.log(params);
     let pageSize =
       "_pageSize_" in params ? parseInt(params._pageSize_) : DEFAULT_PAGE_SIZE;
     if (isNaN(pageSize)) {

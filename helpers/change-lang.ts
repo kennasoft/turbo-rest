@@ -8,6 +8,9 @@ import { JavascriptFlavor } from "../generate-api";
 export async function changeLanguage(
   targetLang: JavascriptFlavor
 ): Promise<void | string> {
+  if (targetLang === "typescript") {
+    return;
+  }
   console.log(
     `converting api code at ${process.cwd()} to ${chalk.yellowBright(
       targetLang
