@@ -13,6 +13,22 @@ import { mapSQLTypeToSwagger } from "./type-mappings";
 // import Page from '../server/lib/entities/page'
 // import Publisher from '../server/lib/entities/publisher'
 
+export const defaultSwagger = {
+  swagger: "2.0",
+  info: {
+    description:
+      "This is an auto-generated API to access resources at http://localhost:3000/api",
+    title: "Restalize API",
+    version: "1.0.0",
+  },
+  host: "localhost:3000",
+  basePath: "/api",
+  tags: [],
+  schemes: ["http", "https"],
+  paths: {},
+  definitions: {},
+};
+
 const queue = {
   waiting: [] as any[],
   busy: false,
