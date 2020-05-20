@@ -36,7 +36,6 @@ describe("generateEntities()", () => {
       .mockImplementation((code?: number) => code);
     mockConsoleLog = jest
       .spyOn(console, "log")
-      // @ts-ignore
       .mockImplementation((text: string) => text);
   });
 

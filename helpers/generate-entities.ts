@@ -2,6 +2,7 @@ import chalk from "chalk";
 import spawn from "cross-spawn";
 import makeDir from "make-dir";
 import fs from "fs";
+import rimraf from "rimraf";
 
 export type DatabaseEngine =
   | "mysql"
@@ -108,6 +109,8 @@ export async function generateEntities(
             };
           }
           makeEnvFile(conf, root);
+          // remove auto-generated tsconfig
+          rimraf(`${entityPath}/tsconfig.json`, function () {});
         } catch (exc) {
           const errorMsg = `unable to automatically generate your .env file. Open ${chalk.green(
             `${root}/.env`
