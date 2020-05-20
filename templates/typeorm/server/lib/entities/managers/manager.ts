@@ -14,8 +14,9 @@ import {
   IsNull,
   ObjectType,
 } from "typeorm";
-import dbConn from "../../utils/db";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
+
+import dbConn from "../../utils/db";
 
 export default class Manager<Entity> {
   connect: Promise<Connection>;
@@ -84,12 +85,13 @@ export default class Manager<Entity> {
           .filter((rel) => attribs.includes(rel))
           .concat(nestedRelations);
       }
+      const id = metadata.primaryColumns[0].propertyName;
       if (
         relations.length > 0 &&
-        validColumns.includes("id") &&
-        !select.includes("id")
+        validColumns.includes(id) &&
+        !select.includes(id)
       ) {
-        select.push("id");
+        select.push(id);
       }
       if (select.length === 0) {
         select = undefined;
@@ -101,7 +103,8 @@ export default class Manager<Entity> {
   _buildWhereClause(params: Record<string, any>, conn: Connection) {
     const whereClause: Record<string, any> = {};
     const self = this;
-    const columnMetadata = conn.getMetadata(this.type).columns;
+    const metadata = conn.getMetadata(this.type);
+    const columnMetadata = metadata.columns;
 
     const applyOperator = (operator: string, param: string, value: any) => {
       if (!operator || operator === "eq") {
@@ -144,6 +147,11 @@ export default class Manager<Entity> {
         }
       }
     };
+    // if primary key is not named {id}, make sure it's included in params
+    if (params.id) {
+      const pk = metadata.primaryColumns[0];
+      params[pk.propertyName] = params.id;
+    }
     Object.keys(params).forEach(function (paramName) {
       let [param, operator, xtraOperator] = paramName.split(".");
       const column = columnMetadata.find(

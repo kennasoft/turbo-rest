@@ -19,10 +19,10 @@ export default class ModelFetcher<Entity> extends Manager<Entity> {
     let queryFilters: Record<string, any> = {
       where: this._buildWhereClause(params, db),
     };
-    if (params.attribs) {
+    if (params._select_) {
       queryFilters = Object.assign(
         queryFilters,
-        this._pickAttributes(params.attribs, db)
+        this._pickAttributes(params._select_, db)
       );
     }
     return db.manager
@@ -65,15 +65,18 @@ export default class ModelFetcher<Entity> extends Manager<Entity> {
       queryFilters.order = parts
         .map((ord: string) => ord.split("."))
         .reduce((acc: Record<string, string>, curr: string[]) => {
-          acc[curr[0]] = curr[1];
+          if (curr.length < 2) {
+            curr.push("ASC");
+          }
+          acc[curr[0]] = curr[1].toUpperCase();
           return acc;
         }, {});
     }
     queryFilters.where = this._buildWhereClause(params, db);
-    if (params.attribs) {
+    if (params._select_) {
       queryFilters = Object.assign(
         queryFilters,
-        this._pickAttributes(params.attribs, db)
+        this._pickAttributes(params._select_, db)
       );
     }
 
