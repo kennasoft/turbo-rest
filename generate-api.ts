@@ -10,8 +10,10 @@ import { shouldUseYarn } from "./helpers/should-use-yarn";
 import { getOnline } from "./helpers/is-online";
 import { install } from "./helpers/install";
 import { changeLanguage } from "./helpers/change-lang";
+import rimraf from "rimraf";
 
 export type JavascriptFlavor = "typescript" | "es2015" | "esnext";
+export type HttpServerTypes = "express" | "hapi";
 
 export type GenerateApiConfig = {
   appPath?: string;
@@ -19,6 +21,7 @@ export type GenerateApiConfig = {
   template: string;
   npmConfig?: any; // object to hold sample package.json
   language: JavascriptFlavor;
+  httpServer?: HttpServerTypes;
 };
 
 export enum EXIT_CODES {
@@ -40,6 +43,7 @@ export async function generateApi({
   template,
   npmConfig,
   language,
+  httpServer,
 }: GenerateApiConfig): Promise<void> {
   if (!appPath) {
     return process.exit(EXIT_CODES.NO_APP_PATH_SPECIFIED);
@@ -48,6 +52,8 @@ export async function generateApi({
   const root = path.resolve(appPath as string);
   const appName = path.basename(root);
   const packageJSON = npmConfig;
+  const hapiDependencies = ["@hapi/hapi", "@hapi/inert"];
+  const expressDependencies = ["express", "cors", "body-parser"];
 
   await makeDir(root);
   if (!isFolderEmpty(root, appName)) {
@@ -78,6 +84,19 @@ export async function generateApi({
   process.chdir(root);
 
   packageJSON.name = appName;
+  const unnecessaryDeps =
+    httpServer === "express" ? hapiDependencies : expressDependencies;
+  unnecessaryDeps.forEach((dep) => {
+    delete packageJSON.dependencies[dep];
+    let depType = dep;
+    // namespaced package type definitions {@namespace/package} are
+    // usually named with the pattern @types/{namespace}__{package}
+    if (dep.startsWith("@")) {
+      depType = dep.slice(1).replace("/", "__");
+    }
+    delete packageJSON.devDependencies[`@types/${depType}`];
+  });
+
   fs.writeFileSync(
     "package.json",
     JSON.stringify(packageJSON, null, 2),
@@ -101,6 +120,31 @@ export async function generateApi({
     cwd: path.join(__dirname, "templates", template),
     filter: (file) => file.name !== "package.json",
   });
+
+  function noop() {}
+
+  // remove unnecessary files
+  if (httpServer === "express") {
+    rimraf(`${root}/server/server.hapi.ts`, noop);
+    rimraf(`${root}/server/routes.hapi.ts`, noop);
+    rimraf(`${root}/server/lib/controllers/api/hapi.ts`, noop);
+  } else {
+    fs.rename(
+      `${root}/server/server.hapi.ts`,
+      `${root}/server/server.ts`,
+      (err) => err && console.error(err)
+    );
+    fs.rename(
+      `${root}/server/routes.hapi.ts`,
+      `${root}/server/routes.ts`,
+      (err) => err && console.error(err)
+    );
+    fs.rename(
+      `${root}/server/lib/controllers/api/hapi.ts`,
+      `${root}/server/lib/controllers/api/index.ts`,
+      (err) => err && console.error(err)
+    );
+  }
 
   const langChangeFailed = await changeLanguage(language);
   if (langChangeFailed) {
