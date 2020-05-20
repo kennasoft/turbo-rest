@@ -9,7 +9,7 @@ import {
   createEntity,
   updateEntity,
   deleteEntity,
-} from "./lib/route-handlers/api";
+} from "./lib/controllers/api";
 import addToSwagger, { defaultSwagger } from "./lib/utils/add-to-swagger";
 
 const routes = function attachRoutes(server: express.Express) {
