@@ -1,6 +1,5 @@
-import { createConnection, Connection } from 'typeorm'
+import { createConnection, Connection } from "typeorm";
 
+const dbConn: Promise<Connection> = createConnection();
 
-const dbConn: Promise<Connection> = createConnection()
-
-export default dbConn
+export default dbConn;

@@ -49,6 +49,10 @@ export const stringTypes = [
   "binary", // mssql
   "varbinary", // mssql, sap
   "string", // cockroachdb
+  "text",
+  "longtext",
+  "mediumtext",
+  "enum",
 ];
 
 export const dateTypes = [
