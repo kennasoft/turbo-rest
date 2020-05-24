@@ -39,7 +39,7 @@ jobs:
           command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/workspace/.npmrc
       - run:
           name: Publish packages
-          command: lerna publish
+          command: yarn publish
 
 workflows:
   version: 2

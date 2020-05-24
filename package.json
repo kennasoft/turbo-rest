@@ -16,9 +16,9 @@
   "author": "Ikenna Okonkwo<ikenna.okonkwo@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "test": "lerna test",
-    "build": "lerna build",
-    "deploy": "lerna deploy"
+    "test": "lerna run test",
+    "build": "lerna run build",
+    "deploy": "lerna run deploy"
   },
   "devDependencies": {
     "jest": "^26.0.1",
