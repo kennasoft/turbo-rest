@@ -16,10 +16,10 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
-      - run: npm install
+      - run: yarn install
       - run:
           name: Run tests
-          command: npm test
+          command: yarn test
 
       - save_cache:
           paths:
@@ -38,8 +38,8 @@ jobs:
           name: Authenticate with registry
           command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/workspace/.npmrc
       - run:
-          name: Publish package
-          command: npm publish
+          name: Publish packages
+          command: lerna publish
 
 workflows:
   version: 2
@@ -58,4 +58,4 @@ workflows:
             tags:
               only: /^v.*/
             branches:
-              ignore: /.*/
+              only: master
