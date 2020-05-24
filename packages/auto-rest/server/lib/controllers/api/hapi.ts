@@ -55,7 +55,7 @@ export function createEntity<Entity>(type: ObjectType<Entity>) {
     request: Hapi.Request,
     h: Hapi.ResponseToolkit
   ) {
-    const body = JSON.parse(request.payload as string);
+    const body = request.payload as Hapi.Util.Dictionary<Entity>;
     const updater = new ModelUpdater(type);
     try {
       return h
@@ -72,9 +72,16 @@ export function updateEntity<Entity>(type: ObjectType<Entity>) {
     request: Hapi.Request,
     h: Hapi.ResponseToolkit
   ) {
-    const { updateFields, condition } = JSON.parse(request.payload as string);
     const updater = new ModelUpdater(type);
+    let {
+      updateFields,
+      condition,
+    }: any = request.payload as Hapi.Util.Dictionary<Entity>;
+    const { id } = request.params;
     try {
+      if (id) {
+        condition = { id: parseInt(id) };
+      }
       const rowsAffected = await updater.update(updateFields, condition);
       console.log(rowsAffected);
       if (rowsAffected) {
@@ -102,7 +109,11 @@ export function deleteEntity<Entity>(type: ObjectType<Entity>) {
     request: Hapi.Request,
     h: Hapi.ResponseToolkit
   ) {
-    const query = request.query;
+    let query = request.query;
+    const { id } = request.params;
+    if (id) {
+      query = { id };
+    }
     const updater = new ModelUpdater(type);
     try {
       const rowsAffected = await updater.delete(query);

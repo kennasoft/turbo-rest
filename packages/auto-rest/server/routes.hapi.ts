@@ -15,14 +15,18 @@ import addToSwagger, { defaultSwagger } from "./lib/utils/add-to-swagger";
 const routes = function attachRoutes(server: Hapi.Server) {
   /**
    * If you wish to override any of the generated routes with your own implementation,
-   * Please insert them before the generated routes, as express will try to match the
+   * Please insert them before the generated routes, as hapi will try to match the
    * routes from top to bottom
    *
    * e.g.
    *
-   * server.get('/api/users', (req, res) => {
-   *   res.status(200).send({ status: 'success', data: users });
-   * })
+   * server.route({
+   *    method: "GET",
+   *    path: "/api/users",
+   *    handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
+   *      h.response({status: "success", data: getUser()}).code(200);
+   *    },
+   * });
    */
 
   // serve the swagger UI for trying out the API
@@ -34,7 +38,9 @@ const routes = function attachRoutes(server: Hapi.Server) {
     },
   });
 
-  const createSwagger: boolean = !fs.existsSync("./docs/swagger.json");
+  const createSwagger: boolean = !fs.existsSync(
+    `${__dirname}/docs/swagger.json`
+  );
   let swaggerJSON: any = null;
   if (createSwagger) {
     swaggerJSON = Object.assign({}, defaultSwagger);
@@ -44,6 +50,7 @@ const routes = function attachRoutes(server: Hapi.Server) {
     swaggerJSON.info.version = packageJSON.version;
   }
 
+  // -------- auto-generated generic CRUD routes -----------
   Object.keys(entities).map((e) => {
     const entityApiPath = `/api/${pluralize(e)}`;
     console.log(`Generating api routes for ${e}`);

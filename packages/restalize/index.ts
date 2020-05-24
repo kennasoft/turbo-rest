@@ -5,6 +5,7 @@ import path from "path";
 import prompts from "prompts";
 
 import { generateApi } from "./generate-api";
+import linkTemplate from "./helpers/link-template-files";
 import packageJson from "./package.json";
 
 let apiRoot = "";
@@ -139,6 +140,13 @@ async function run(): Promise<void> {
   //   process.exit(1);
   // }
   const template = { value: "typeorm" };
+  const templateLinkFailed = await linkTemplate(serverType.value);
+  if (templateLinkFailed) {
+    console.error(
+      `Could not locate template files!\nError: ${templateLinkFailed}`
+    );
+    process.exit(1);
+  }
   const npmConfig = require(`./templates/${template.value}/package.json`);
 
   await generateApi({

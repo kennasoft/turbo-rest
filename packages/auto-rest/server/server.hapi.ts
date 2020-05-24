@@ -1,5 +1,5 @@
 import Hapi from "@hapi/hapi";
-import attachRoutes from "./routes";
+import attachRoutes from "./routes.hapi";
 import path from "path";
 
 import "reflect-metadata";

@@ -1,13 +1,17 @@
 {
-  "name": "my-rest-api",
+  "name": "@restalize/auto-rest",
   "version": "1.0.0",
   "description": "Sample restalize api",
-  "main": "server.js",
+  "main": "./dist/server.js",
+  "files": [
+    "./"
+  ],
   "license": "MIT",
   "scripts": {
     "build": "tsc",
     "dev": "nodemon ./server/server.ts",
-    "start": "node ./dist/server.js"
+    "start": "node ./dist/server.js",
+    "deploy": "yarn build && npm deploy"
   },
   "dependencies": {
     "@hapi/hapi": "^19.1.1",

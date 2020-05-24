@@ -3,6 +3,7 @@ import cpy from "cpy";
 import fs from "fs";
 import makeDir from "make-dir";
 import path from "path";
+import rimraf from "rimraf";
 
 import { isFolderEmpty } from "./helpers/is-folder-empty";
 import { TmgConfig, generateEntities } from "./helpers/generate-entities";
@@ -10,7 +11,7 @@ import { shouldUseYarn } from "./helpers/should-use-yarn";
 import { getOnline } from "./helpers/is-online";
 import { install } from "./helpers/install";
 import { changeLanguage } from "./helpers/change-lang";
-import rimraf from "rimraf";
+import "./helpers/link-template-files";
 
 export type JavascriptFlavor = "typescript" | "es2015" | "esnext";
 export type HttpServerTypes = "express" | "hapi";

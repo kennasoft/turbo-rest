@@ -269,10 +269,10 @@ export default async function addToSwagger<Entity>(
       operationId: `update${pluralize(entity.name)}`,
       description: `Updates a collection of ${pluralize(
         entity.name
-      )} that match query parameters`,
+      )} that match query parameters or {condition} object in body`,
       ...restMethodProps(entityMeta, "query", [
         {
-          name: "updateFields",
+          name: "updatePayload",
           in: "body",
           required: true,
           description: `A JSON object containing the ${pluralize(
@@ -280,7 +280,19 @@ export default async function addToSwagger<Entity>(
             1
           )} fields to be updated`,
           schema: {
-            $ref: `#/definitions/${entity.name}`,
+            properties: {
+              updateFields: {
+                description: `Fields that need to be updated on the ${pluralize(
+                  entity.name,
+                  1
+                )}`,
+                $ref: `#/definitions/${entity.name}`,
+              },
+              condition: {
+                description: `Search conditions`,
+                $ref: `#/definitions/${entity.name}`,
+              },
+            },
           },
         },
       ]),
