@@ -49,6 +49,29 @@ export const stringTypes = [
   "binary", // mssql
   "varbinary", // mssql, sap
   "string", // cockroachdb
+  "enum", // mysql
+  "tinyblob", // mysql
+  "tinytext", // mysql
+  "mediumblob", // mysql
+  "mediumtext", // mysql
+  "blob", // mysql, oracle, sqlite, cockroachdb, sap
+  "text", // mysql, postgres, mssql, sqlite, cockroachdb, sap
+  "ntext", // mssql
+  "citext", // postgres
+  "hstore", // postgres
+  "longblob", // mysql
+  "longtext", // mysql
+  "alphanum", // sap
+  "shorttext", // sap
+  "bytes", // cockroachdb
+  "bytea", // postgres, cockroachdb
+  "long", // oracle
+  "raw", // oracle
+  "long raw", // oracle
+  "bfile", // oracle
+  "clob", // oracle, sqlite, sap
+  "nclob", // oracle, sap
+  "image", // mssql
 ];
 
 export const dateTypes = [
@@ -75,7 +98,7 @@ export const dateTypes = [
 ];
 
 export const mapSQLTypeToSwagger = (type: string): string[] => {
-  let swaggerType = type;
+  let swaggerType = "string";
   let example = "unknown type";
   if (stringTypes.includes(type)) {
     swaggerType = "string";

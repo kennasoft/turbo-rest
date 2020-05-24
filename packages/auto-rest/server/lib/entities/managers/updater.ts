@@ -14,6 +14,7 @@ export default class ModelUpdater<Entity> extends Manager<Entity> {
         `The following fields are not valid on type <${this.type.name}>: ${validated}`
       );
     }
+    console.log(`Creating new ${this.type.name} with params`, record);
     return db.manager
       .insert(this.type, record)
       .then((res) => Object.assign({}, record, res.generatedMaps[0]))
@@ -33,7 +34,7 @@ export default class ModelUpdater<Entity> extends Manager<Entity> {
     }
 
     const queryFilters = this._buildWhereClause(condition, db);
-    console.log(queryFilters);
+    console.log(`Updating ${this.type.name} with params`, queryFilters);
     if (!queryFilters || JSON.stringify(queryFilters) === "{}") {
       throw new Error(
         `You must specify valid query parameters for an update operation, to avoid modifying all rows in your database table in error`
@@ -50,7 +51,7 @@ export default class ModelUpdater<Entity> extends Manager<Entity> {
   async delete(params = {} as Record<string, any>): Promise<number | void> {
     const db: Connection = await this.connect;
     let queryFilters = this._buildWhereClause(params, db);
-    console.log(queryFilters);
+    console.log(`Deleting ${this.type.name} with params`, queryFilters);
 
     if (!queryFilters || JSON.stringify(queryFilters) === "{}") {
       throw new Error(

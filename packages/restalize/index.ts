@@ -5,6 +5,7 @@ import path from "path";
 import prompts from "prompts";
 
 import { generateApi } from "./generate-api";
+import linkTemplate from "./helpers/link-template-files";
 import packageJson from "./package.json";
 
 let apiRoot = "";
@@ -60,6 +61,10 @@ const program = new Commander.Command(packageJson.name)
       Default is mysql`,
     "mysql"
   )
+  .option(
+    "-s --server <http-server-type>",
+    "choose between using express or hapi http servers"
+  )
   .allowUnknownOption()
   .parse(process.argv);
 
@@ -83,9 +88,9 @@ async function run(): Promise<void> {
 
   if (!apiRoot) {
     console.log();
-    console.log("Please specify the project directory:");
+    console.log("Please specify the project folder:");
     console.log(
-      `  ${chalk.cyan(program.name())} ${chalk.green("<project-directory>")}`
+      `  ${chalk.cyan(program.name())} ${chalk.green("<project-folder>")}`
     );
     console.log();
     console.log("For example:");
@@ -101,6 +106,23 @@ async function run(): Promise<void> {
 
   const resolvedProjectPath = path.resolve(apiRoot);
   const projectName = path.basename(resolvedProjectPath);
+
+  const serverType = program.server
+    ? { value: program.server }
+    : await prompts({
+        type: "select",
+        name: "value",
+        message: "Select http server type",
+        choices: [
+          { title: "Express", value: "express" },
+          { title: "Hapi", value: "hapi" },
+        ],
+      });
+  if (!serverType.value) {
+    console.log();
+    console.log("Please specify the http server type");
+    process.exit(1);
+  }
 
   // const template = await prompts({
   //   type: "select",
@@ -118,6 +140,13 @@ async function run(): Promise<void> {
   //   process.exit(1);
   // }
   const template = { value: "typeorm" };
+  const templateLinkFailed = await linkTemplate(serverType.value);
+  if (templateLinkFailed) {
+    console.error(
+      `Could not locate template files!\nError: ${templateLinkFailed}`
+    );
+    process.exit(1);
+  }
   const npmConfig = require(`./templates/${template.value}/package.json`);
 
   await generateApi({
@@ -133,6 +162,7 @@ async function run(): Promise<void> {
     },
     template: template.value,
     npmConfig,
+    httpServer: serverType.value,
     language: program.lang,
   });
 }

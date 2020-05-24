@@ -121,6 +121,14 @@ export default async function addToSwagger<Entity>(
 
   const orderAndPagination = [
     {
+      name: "_select_",
+      in: "query",
+      required: false,
+      description:
+        "comma-separated list of fields to be returned in the results.",
+      type: "string",
+    },
+    {
       name: "_orderBy_",
       in: "query",
       required: false,
@@ -192,6 +200,7 @@ export default async function addToSwagger<Entity>(
           in: paramSource,
           required: false,
           type: mapSQLTypeToSwagger(col.type as string)[0],
+          description: col.comment,
         })),
         ...additionalParams,
       ],
@@ -260,10 +269,10 @@ export default async function addToSwagger<Entity>(
       operationId: `update${pluralize(entity.name)}`,
       description: `Updates a collection of ${pluralize(
         entity.name
-      )} that match query parameters`,
+      )} that match query parameters or {condition} object in body`,
       ...restMethodProps(entityMeta, "query", [
         {
-          name: "updateFields",
+          name: "updatePayload",
           in: "body",
           required: true,
           description: `A JSON object containing the ${pluralize(
@@ -271,7 +280,19 @@ export default async function addToSwagger<Entity>(
             1
           )} fields to be updated`,
           schema: {
-            $ref: `#/definitions/${entity.name}`,
+            properties: {
+              updateFields: {
+                description: `Fields that need to be updated on the ${pluralize(
+                  entity.name,
+                  1
+                )}`,
+                $ref: `#/definitions/${entity.name}`,
+              },
+              condition: {
+                description: `Search conditions`,
+                $ref: `#/definitions/${entity.name}`,
+              },
+            },
           },
         },
       ]),
@@ -421,11 +442,10 @@ export default async function addToSwagger<Entity>(
     const swaggerFile = path.join(
       __dirname,
       "..",
-      "server",
+      "..",
       "docs",
       "swagger.json"
     );
-    db.close();
     fs.writeFile(
       `${swaggerFile}`,
       JSON.stringify(swaggerJSON, null, 2),
@@ -439,21 +459,23 @@ export default async function addToSwagger<Entity>(
 }
 
 // const mySwagger = {
-//   swagger: '2.0',
+//   swagger: "2.0",
 //   info: {
 //     description:
-//       'This is an auto-generated API to access resources at http://localhost:3000/api',
-//     title: 'Restalize API',
-//     version: '1.0.0'
+//       "This is an auto-generated API to access resources at http://localhost:3000/api",
+//     title: "Restalize API",
+//     version: "1.0.0",
 //   },
-//   host: 'localhost:3000',
-//   basePath: '/api',
+//   host: "localhost:3000",
+//   basePath: "/api",
 //   tags: [],
-//   schemes: ['http', 'https'],
+//   schemes: ["http", "https"],
 //   paths: {},
-//   definitions: {}
-// }
+//   definitions: {},
+// };
 
-// const entities = [Episode, Title, Page, Creator, Publisher]
+// const entities = [Episode, Title, Page, Creator, Publisher];
 
-// entities.map(e => addToSwagger(e, mySwagger))
+// Promise.all(entities.map((e) => addToSwagger(e, mySwagger))).then(() =>
+//   dbConn.then((conn) => conn.close())
+// );
