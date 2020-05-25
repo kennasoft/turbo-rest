@@ -11,6 +11,7 @@ jest.mock("./helpers/is-folder-empty", () => ({ isFolderEmpty: () => true }));
 jest.mock("./helpers/generate-entities");
 jest.mock("./helpers/install");
 jest.mock("./helpers/change-lang");
+jest.mock("./helpers/link-template-files");
 
 import { EXIT_CODES } from "./generate-api";
 
