@@ -8,4 +8,5 @@ module.exports = {
     "^.+\\.(ts|tsx)$": "ts-jest",
   },
   modulePathIgnorePatterns: ["./dist"],
+  collectCoverage: true,
 };
