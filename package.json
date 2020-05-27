@@ -10,7 +10,8 @@
       "packages/*"
     ],
     "nohoist": [
-      "**@zeit/ncc"
+      "**@zeit/ncc",
+      "**@restalize/auto-rest"
     ]
   },
   "author": "Ikenna Okonkwo<ikenna.okonkwo@gmail.com>",
@@ -22,10 +23,6 @@
     "deploy": "lerna run deploy"
   },
   "devDependencies": {
-    "jest": "^26.0.1",
-    "lerna": "^3.20.2",
-    "ts-jest": "^26.0.0",
-    "ts-node": "^8.10.1",
-    "typescript": "^3.9.3"
+    "lerna": "^3.20.2"
   }
 }
