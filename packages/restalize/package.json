@@ -32,7 +32,7 @@
   "author": "Ikenna Okonkwo<ikenna.okonkwo@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@restalize/auto-rest": "^1.0.1",
+    "auto-rest": "^1.0.1",
     "chalk": "^4.0.0",
     "commander": "^5.1.0",
     "cpy": "^8.1.0",

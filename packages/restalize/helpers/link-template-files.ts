@@ -3,7 +3,7 @@ import path from "path";
 
 // const handleError = (err: NodeJS.ErrnoException | null) =>
 //   err && console.error(err);
-const pathToAutoRest = require.resolve("@restalize/auto-rest");
+const pathToAutoRest = require.resolve("auto-rest");
 const typeormTemplateRoot = path.join(__dirname, "..", "templates", "typeorm");
 const autoRestRoot = pathToAutoRest.replace(/\/dist\/server.js$/, "");
 

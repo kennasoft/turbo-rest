@@ -11,7 +11,7 @@
     ],
     "nohoist": [
       "**@zeit/ncc",
-      "**@restalize/auto-rest"
+      "**auto-rest"
     ]
   },
   "author": "Ikenna Okonkwo<ikenna.okonkwo@gmail.com>",
