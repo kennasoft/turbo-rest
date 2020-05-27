@@ -25,4 +25,4 @@ export default async function linkTemplateFiles(
   });
 }
 
-linkTemplateFiles("").then((err) => console.error(err));
+// linkTemplateFiles("").then((err) => console.error(err));
