@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Sample restalize api",
   "main": "./dist/server.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:kennasoft/restalize.git"
+  },
   "files": [
     "./"
   ],
