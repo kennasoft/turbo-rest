@@ -15,7 +15,7 @@
     "build": "tsc",
     "dev": "nodemon ./server/server.ts",
     "start": "node ./dist/server.js",
-    "deploy": "yarn build && npm deploy"
+    "deploy": "yarn build && npm publish"
   },
   "dependencies": {
     "@hapi/hapi": "^19.1.1",

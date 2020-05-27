@@ -27,7 +27,7 @@
     "test:watch": "yarn test --watch",
     "prepare": "yarn release",
     "start": "rimraf ./output && yarn build && npx ./dist/index.js",
-    "deploy": "yarn build && npm deploy"
+    "deploy": "yarn build && npm publish"
   },
   "author": "Ikenna Okonkwo<ikenna.okonkwo@gmail.com>",
   "license": "MIT",
