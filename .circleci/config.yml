@@ -17,7 +17,12 @@ jobs:
             - v1-dependencies-
 
       - run: yarn install
-      - run: yarn bootstrap
+      - run:
+          name: Build all packages
+          command: yarn build
+      - run:
+          name: Symlink lerna dependencies
+          command: yarn bootstrap
       - run:
           name: Run tests
           command: yarn test

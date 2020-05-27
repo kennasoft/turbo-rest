@@ -55,7 +55,7 @@ export function createEntity<Entity>(type: ObjectType<Entity>) {
     request: Hapi.Request,
     h: Hapi.ResponseToolkit
   ) {
-    const body = request.payload as Hapi.Util.Dictionary<Entity>;
+    const body: any = request.payload as Hapi.Util.Dictionary<Entity>;
     const updater = new ModelUpdater(type);
     try {
       return h
