@@ -41,6 +41,9 @@ jobs:
       - attach_workspace:
           at: ~/workspace
       - run:
+          name: Change yarn registry
+          command: yarn config set registry https://registry.npmjs.org/
+      - run:
           name: Authenticate with registry
           command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/workspace/.npmrc
       - run:

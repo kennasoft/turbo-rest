@@ -1,4 +1,4 @@
-# RESTalize v1.0.0
+# RESTalize v1.1.3
 
 Restalize is a robust Code generator that receives a relational database connection as input and creates a node.js-based REST api project in a specified folder.
 
@@ -45,7 +45,7 @@ Usage: restalize <project-folder> [options]
 
 Options:
   -V, --version                            output the version number
-  -l, --lang <language>                    The language you want your generated api in. Options are: [typescript, es2015,     esnext] (default: "typescript")
+  -l, --lang <language>                    The language you want your generated api in. Options are: [typescript, es2015, esnext] (default: "typescript")
   -h, --host <database-host>               database host from which you want to generate the api. (default: "localhost")
   -p, port <database-port>                 database port to connect to. (default: "3306")
   -d, --database <database-name>           database name to generate entities from.
