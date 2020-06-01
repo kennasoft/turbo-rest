@@ -9,7 +9,7 @@
     "strictPropertyInitialization": false,
     "experimentalDecorators": true,
     "outDir": "./dist",
-    "rootDir": "./server"
+    "rootDir": "./"
   },
   "exclude": ["./dist"]
 }

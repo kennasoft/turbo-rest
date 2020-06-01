@@ -17,6 +17,7 @@ import {
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
 import dbConn from "../../utils/db";
+import { intTypes, floatTypes, dateTypes } from "../../utils/type-mappings";
 
 export default class Manager<Entity> {
   connect: Promise<Connection>;
@@ -136,13 +137,11 @@ export default class Manager<Entity> {
             whereClause[param] = Between(value[0], value[1]);
             break;
           case "like":
-            whereClause[param] = Like(
-              value.startsWith("*")
-                ? `%${value}`
-                : value.endsWith("*")
-                ? `${value}%`
-                : `%${value}%`
-            );
+            let val: string = value;
+            val = val.startsWith("*") ? `%${val.slice(1)}` : val;
+            val = val.endsWith("*") ? `${val.slice(0, -1)}%` : val;
+            val = val.includes("%") ? val : `%${val}%`;
+            whereClause[param] = Like(val);
             break;
         }
       }
@@ -183,55 +182,41 @@ export default class Manager<Entity> {
         : Array.isArray(value)
         ? value
         : [value];
-    switch (sqlType) {
-      case Date:
-      case "timestamp":
-      case "datetime":
-      case "date": {
-        val = val.map((v: string) => {
-          if (String.prototype.toLowerCase.call(v) === "null") {
-            return IsNull();
-          }
-          let theDate;
-          try {
-            theDate = moment(v).toDate();
-          } catch (err) {
-            throw new Error(`Invalid date value '${v}' found for param`);
-          }
-          return theDate;
-        });
-        break;
-      }
-      case Number:
-      case "int":
-      case "smallint":
-      case "mediumint":
-      case "bigint":
-      case "integer":
-      case "double":
-      case "float": {
-        val = val.map((v: string) => {
-          if (String.prototype.toLowerCase.call(val[0]) === "null") {
-            return IsNull();
-          }
-          const intVal = String.prototype.includes.call(v, ".")
-            ? parseFloat(v)
-            : parseInt(v);
-          if (isNaN(intVal)) {
-            throw new Error(`Invalid numeric value '${v}' found for param`);
-          }
-          return intVal;
-        });
-        break;
-      }
-    }
-    if (
+    if (dateTypes.includes(sqlType as string) || sqlType === Date) {
+      val = val.map((v: string) => {
+        if (String.prototype.toLowerCase.call(v) === "null") {
+          return IsNull();
+        }
+        let theDate;
+        try {
+          theDate = moment(v).toDate();
+        } catch (err) {
+          throw new Error(`Invalid date value '${v}' found for param`);
+        }
+        return theDate;
+      });
+    } else if (
+      intTypes.includes(sqlType as string) ||
+      floatTypes.includes(sqlType as string)
+    ) {
+      val = val.map((v: string) => {
+        if (String.prototype.toLowerCase.call(val[0]) === "null") {
+          return IsNull();
+        }
+        const intVal = String.prototype.includes.call(v, ".")
+          ? parseFloat(v)
+          : parseInt(v);
+        if (isNaN(intVal)) {
+          throw new Error(`Invalid numeric value '${v}' found for param`);
+        }
+        return intVal;
+      });
+    } else if (
       val.length === 1 &&
       String.prototype.toLowerCase.call(val[0]) === "null"
     ) {
       val[0] = IsNull();
     }
-
     return val.length === 1 ? val[0] : val;
   }
 }

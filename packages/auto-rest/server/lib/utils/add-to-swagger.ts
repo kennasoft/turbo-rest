@@ -446,15 +446,20 @@ export default async function addToSwagger<Entity>(
       "docs",
       "swagger.json"
     );
-    fs.writeFile(
-      `${swaggerFile}`,
-      JSON.stringify(swaggerJSON, null, 2),
-      (err) => {
-        if (!err) {
-          console.log(`${swaggerFile} updated successfully!`);
+    return new Promise((resolve, reject) => {
+      fs.writeFile(
+        `${swaggerFile}`,
+        JSON.stringify(swaggerJSON, null, 2),
+        (err) => {
+          if (!err) {
+            console.log(`${swaggerFile} updated successfully!`);
+            resolve();
+          } else {
+            reject();
+          }
         }
-      }
-    );
+      );
+    });
   }
 }
 
