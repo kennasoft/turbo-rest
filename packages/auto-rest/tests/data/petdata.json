@@ -1,0 +1,64 @@
+[
+  {
+    "name": "FuzzyCat",
+    "photoUrls": [
+      "http://loremflickr.com/g/320/240/cat",
+      "http://loremflickr.com/320/240/cat"
+    ],
+    "tags": [{ "name": "cat" }, { "name": "feline" }],
+    "status": "available",
+    "category": { "name": "cat" }
+  },
+  {
+    "name": "NaughtyDog",
+    "photoUrls": [
+      "http://loremflickr.com/g/320/240/dog",
+      "http://loremflickr.com/320/240/dog"
+    ],
+    "tags": [{ "name": "dog" }, { "name": "k9" }],
+    "status": "available",
+    "category": { "name": "dog" }
+  },
+  {
+    "name": "Spotty",
+    "photoUrls": [
+      "http://loremflickr.com/g/320/240/leopard",
+      "http://loremflickr.com/320/240/leopard"
+    ],
+    "tags": [
+      { "name": "feline" },
+      { "name": "leopard" },
+      { "name": "wildcat" }
+    ],
+    "status": "available",
+    "category": { "name": "cat" }
+  },
+  {
+    "name": "King Kong",
+    "photoUrls": [
+      "http://www.sciencedump.com/sites/default/files/field/teaserimage/gorilla.jpg",
+      "http://www.kidzone.ws/ANIMALS/gorillas/gorilla.jpg",
+      "http://i.dailymail.co.uk/i/pix/2014/04/14/article-2604010-1D117C4D00000578-291_634x782.jpg",
+      "http://i4.mirror.co.uk/incoming/article8084087.ece/ALTERNATES/s615/MAIN-Dublin-zoo-gorilla-dies-after-short-illness.jpg"
+    ],
+    "tags": [{ "name": "ape" }, { "name": "gorilla" }, { "name": "primate" }],
+    "status": "available",
+    "category": { "name": "primate" }
+  },
+  {
+    "name": "Tyrannosaurus Rex",
+    "photoUrls": [
+      "http://vignette2.wikia.nocookie.net/jurassicpark/images/5/57/Jurassic-world-stomp-strike-tyrannosaurus-rex-1.jpg/revision/latest?cb=20150213174835",
+      "http://orig03.deviantart.net/f652/f/2014/331/5/7/jurassic_world__tyrannosaurus_rex_by_sonichedgehog2-d87wp3n.png",
+      "http://www.abc.net.au/news/image/7251586-3x2-940x627.jpg",
+      "http://www.sideshowtoy.com/assets/products/200209-t-rex-the-tyrant-king/lg/200209-t-rex-the-tyrant-king-003.jpg"
+    ],
+    "tags": [
+      { "name": "T-Rex" },
+      { "name": "Dinosaur" },
+      { "name": "Jurassic" }
+    ],
+    "status": "unavailable",
+    "category": { "name": "dinosaur" }
+  }
+]
