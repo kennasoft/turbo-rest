@@ -17,6 +17,7 @@
   "author": "Ikenna Okonkwo<ikenna.okonkwo@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "clean": "lerna run clean",
     "bootstrap": "lerna bootstrap",
     "test": "lerna run test",
     "build": "lerna run build",

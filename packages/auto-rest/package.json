@@ -2,7 +2,7 @@
   "name": "auto-rest",
   "version": "1.0.1",
   "description": "Sample restalize api",
-  "main": "./dist/server.js",
+  "main": "./dist/server/server.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:kennasoft/restalize.git"
@@ -12,6 +12,7 @@
   ],
   "license": "MIT",
   "scripts": {
+    "clean": "rimraf ./dist/",
     "build": "tsc",
     "dev": "nodemon ./server/server.ts",
     "start": "node ./dist/server.js",
