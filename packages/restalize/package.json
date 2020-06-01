@@ -20,8 +20,9 @@
     "dist"
   ],
   "scripts": {
+    "clean": "rimraf ./dist/",
     "build": "ncc build ./index.ts -o dist/",
-    "prerelease": "rimraf ./dist/",
+    "prerelease": "yarn clean",
     "release": "ncc build ./index.ts -o ./dist/ --minify --no-cache --no-source-map-register",
     "test": "jest",
     "test:watch": "yarn test --watch",
