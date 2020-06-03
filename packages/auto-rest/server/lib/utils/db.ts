@@ -1,7 +1,7 @@
 import { createConnection, Connection, ConnectionOptions } from "typeorm";
 import path from "path";
 
-const dbconfig: ConnectionOptions =
+const dbconfig: ConnectionOptions | undefined =
   process.env.NODE_ENV === "test"
     ? {
         name: "default",
@@ -15,8 +15,10 @@ const dbconfig: ConnectionOptions =
           path.resolve(`${__dirname}/../../../tests/lib/entities/*.ts`),
         ],
       }
-    : ({} as ConnectionOptions);
+    : undefined;
 
-const dbConn: Promise<Connection> = createConnection(dbconfig);
+const dbConn: Promise<Connection> = dbconfig
+  ? createConnection(dbconfig)
+  : createConnection();
 
 export default dbConn;
