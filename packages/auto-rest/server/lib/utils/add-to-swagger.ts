@@ -7,13 +7,23 @@ import path from "path";
 
 import dbConn from "./db";
 import { mapSQLTypeToSwagger } from "./type-mappings";
-// import Creator from '../server/lib/entities/creator'
-// import Episode from '../server/lib/entities/episode'
-// import Title from '../server/lib/entities/title'
-// import Page from '../server/lib/entities/page'
-// import Publisher from '../server/lib/entities/publisher'
 
-export const defaultSwagger = {
+export type TSwaggerJSON = {
+  swagger: string;
+  info: {
+    description: string;
+    title: string;
+    version: string;
+  };
+  host: string;
+  basePath: string;
+  tags: Record<string, any>[];
+  schemes: string[];
+  paths: Record<string, any>;
+  definitions: Record<string, any>;
+};
+
+export const defaultSwagger: TSwaggerJSON = {
   swagger: "2.0",
   info: {
     description:
@@ -34,10 +44,68 @@ const queue = {
   busy: false,
 };
 
+let timeout: NodeJS.Timeout;
+
+export const patchSwagger = async (
+  swaggerJSON: Record<string, any>
+): Promise<TSwaggerJSON | void> => {
+  const swaggerFile = path.join(__dirname, "..", "..", "docs", "swagger.json");
+
+  if (queue.waiting.length || queue.busy) {
+    //defer for later if promise queue is not empty
+    timeout = setTimeout(() => patchSwagger(swaggerJSON), 500);
+    return;
+  }
+  let currentSwagger: TSwaggerJSON;
+
+  return new Promise((resolve, reject) => {
+    //@ts-ignore
+    fs.readFile(
+      swaggerFile,
+      "utf8",
+      (err: NodeJS.ErrnoException, data: string) => {
+        if (err) {
+          reject();
+          return console.log(err);
+        }
+        currentSwagger = defaultSwagger;
+        if (data) {
+          currentSwagger = JSON.parse(data);
+        }
+        // patch it
+        currentSwagger = {
+          ...currentSwagger,
+          paths: { ...currentSwagger.paths, ...swaggerJSON.paths },
+          definitions: {
+            ...currentSwagger.definitions,
+            ...swaggerJSON.definitions,
+          },
+        };
+        swaggerJSON.tags.map((tag: any) => {
+          const exists = currentSwagger.tags.find((t) => t.name === tag.name);
+          if (exists) {
+            exists.name = tag.name;
+            exists.description = tag.description;
+          } else {
+            currentSwagger.tags.push(tag);
+          }
+        });
+        // overwrite file
+        fs.writeFileSync(
+          swaggerFile,
+          JSON.stringify(currentSwagger, null, 2),
+          "utf8"
+        );
+        return resolve(currentSwagger);
+      }
+    );
+  });
+};
+
 export default async function addToSwagger<Entity>(
   entity: ObjectType<Entity>,
   swaggerJSON: any
-): Promise<void> {
+): Promise<TSwaggerJSON | void> {
   if (queue.busy && !queue.waiting.includes(entity)) {
     queue.waiting.push(entity);
     return;
@@ -447,40 +515,12 @@ export default async function addToSwagger<Entity>(
       "swagger.json"
     );
     return new Promise((resolve, reject) => {
-      fs.writeFile(
-        `${swaggerFile}`,
-        JSON.stringify(swaggerJSON, null, 2),
-        (err) => {
-          if (!err) {
-            console.log(`${swaggerFile} updated successfully!`);
-            resolve();
-          } else {
-            reject();
-          }
-        }
-      );
+      try {
+        fs.writeFileSync(swaggerFile, JSON.stringify(swaggerJSON, null, 2));
+      } catch (err) {
+        reject(err);
+      }
+      return resolve(swaggerJSON);
     });
   }
 }
-
-// const mySwagger = {
-//   swagger: "2.0",
-//   info: {
-//     description:
-//       "This is an auto-generated API to access resources at http://localhost:3000/api",
-//     title: "Restalize API",
-//     version: "1.0.0",
-//   },
-//   host: "localhost:3000",
-//   basePath: "/api",
-//   tags: [],
-//   schemes: ["http", "https"],
-//   paths: {},
-//   definitions: {},
-// };
-
-// const entities = [Episode, Title, Page, Creator, Publisher];
-
-// Promise.all(entities.map((e) => addToSwagger(e, mySwagger))).then(() =>
-//   dbConn.then((conn) => conn.close())
-// );
