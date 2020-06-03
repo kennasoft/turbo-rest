@@ -1,4 +1,5 @@
-import { Connection, Not, MoreThanOrEqual } from "typeorm";
+import { Connection, Not, MoreThanOrEqual, Between } from "typeorm";
+import moment from "moment";
 
 import Manager from "../../../../server/lib/entities/managers/manager";
 import { initializeDatabase, teardownDatabase, loadData } from "../../utils/db";
@@ -89,6 +90,7 @@ describe("Manager", () => {
     const params = {
       "id.gte": "1",
       "name.not.eq": "Furball",
+      "createdAt.between": ["2020-05-01", "2020-05-25"],
       status: "unknown",
     };
 
@@ -97,6 +99,9 @@ describe("Manager", () => {
       expect(result.id).toEqual(MoreThanOrEqual(1));
       expect(result.name).toEqual(Not("Furball"));
       expect(result.status).toBe("unknown");
+      expect(result.createdAt).toEqual(
+        Between(moment("2020-05-01").toDate(), moment("2020-05-25").toDate())
+      );
     });
   });
 });

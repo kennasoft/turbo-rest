@@ -17,7 +17,7 @@ export type QExecutor = {
 };
 
 export const initializeDatabase = async (): Promise<Connection> => {
-  console.log("connecting to database");
+  // console.log("connecting to database");
   return dbConn;
 };
 
@@ -109,6 +109,6 @@ export const Executor: QExecutor = {
 // Executor.interval = setInterval(Executor.execute, 100);
 
 export const teardownDatabase = async (conn: Connection): Promise<void> => {
-  console.log("Closing connection");
+  // console.log("Closing connection");
   await conn.close();
 };
