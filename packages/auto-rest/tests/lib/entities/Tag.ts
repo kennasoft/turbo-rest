@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from "typeorm";
 import Pet from "./Pet";
 
 @Entity({ name: "tag" })
@@ -8,17 +15,23 @@ class Tag {
     name: "id",
     comment: "Auto-generated id for Tags",
   })
-  id?: number;
+  public id?: number;
 
   @Column("varchar", {
     name: "name",
     unique: true,
     comment: "This is a unique name that can be used to tag pets",
   })
-  name?: string;
+  public name?: string;
 
   @ManyToMany(() => Pet, (pet) => pet.tags)
-  pets?: Pet[];
+  public pets?: Pet[];
+
+  @CreateDateColumn({ name: "created_at" })
+  public createdAt?: Date;
+
+  @UpdateDateColumn({ name: "updated_at" })
+  public updatedAt?: Date;
 
   constructor(init?: Partial<Tag>) {
     Object.assign(this, init);

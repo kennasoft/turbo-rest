@@ -6,6 +6,8 @@ import {
   ManyToMany,
   JoinTable,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import Category from "./Category";
 import Tag from "./Tag";
@@ -57,6 +59,12 @@ class Pet {
     inverseJoinColumn: { name: "tag_id" },
   })
   public tags?: Tag[];
+
+  @CreateDateColumn({ name: "created_at" })
+  public createdAt?: Date;
+
+  @UpdateDateColumn({ name: "updated_at" })
+  public updatedAt?: Date;
 
   constructor(init?: Partial<Pet>) {
     Object.assign(this, init);
