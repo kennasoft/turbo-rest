@@ -1,6 +1,6 @@
 {
-  "name": "auto-rest",
-  "version": "1.1.5",
+  "name": "restalize-template",
+  "version": "1.0.0",
   "description": "Sample restalize api",
   "main": "./dist/server/server.js",
   "repository": {

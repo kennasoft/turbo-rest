@@ -36,7 +36,7 @@
   "author": "Ikenna Okonkwo<ikenna.okonkwo@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "auto-rest": "^1.0.1",
+    "restalize-template": "^1.0.0",
     "chalk": "^4.0.0",
     "commander": "^5.1.0",
     "cpy": "^8.1.0",
