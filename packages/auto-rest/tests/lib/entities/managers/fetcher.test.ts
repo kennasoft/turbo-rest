@@ -11,7 +11,6 @@ describe("ModelFetcher", () => {
   beforeAll(async () => {
     dbConn = await initializeDatabase();
     await loadData();
-    fetcher = new ModelFetcher(Pet);
   });
 
   afterAll(async () => {
@@ -19,6 +18,7 @@ describe("ModelFetcher", () => {
   });
 
   it("should initialize using an Entity", async () => {
+    fetcher = new ModelFetcher(Pet);
     expect(fetcher.type).toBe(Pet);
   });
 
@@ -48,5 +48,33 @@ describe("ModelFetcher", () => {
   it("should count entities matching condition", async () => {
     const count = await fetcher.count({ status: "unavailable" });
     expect(count).toBe(1);
+  });
+
+  it("should fetch sorted list of entities based on _orderBy_ param", async () => {
+    const petList = await fetcher.list({ _orderBy_: "name.DESC" });
+    expect(petList.rows[0].name).toBe("Tyrannosaurus Rex");
+    expect(petList.rows[4].name).toBe("FuzzyCat");
+  });
+
+  it("should return a subset of results based on _pageSize_ param", async () => {
+    const petList = await fetcher.list({ _pageSize_: 2 });
+    expect(petList.total).toBe(5);
+    expect(petList.subtotal).toBe(2);
+    expect(petList.rows.length).toBe(2);
+    expect(petList.rows.map((pet) => pet.name)).toEqual([
+      "FuzzyCat",
+      "NaughtyDog",
+    ]);
+  });
+
+  it("should get a subset of results based on _page_ and _pageSize_ params", async () => {
+    const petList = await fetcher.list({ _pageSize_: 2, _page_: 2 });
+    expect(petList.total).toBe(5);
+    expect(petList.subtotal).toBe(2);
+    expect(petList.rows.length).toBe(2);
+    expect(petList.rows.map((pet) => pet.name)).toEqual([
+      "Spotty",
+      "King Kong",
+    ]);
   });
 });
