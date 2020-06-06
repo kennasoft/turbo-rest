@@ -45,7 +45,7 @@ jobs:
           command: yarn config set registry https://registry.npmjs.org/
       - run:
           name: Authenticate with registry
-          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/workspace/.npmrc
+          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/.npmrc
       - run:
           name: Publish packages
           command: yarn deploy
