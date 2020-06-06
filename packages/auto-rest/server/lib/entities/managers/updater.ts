@@ -1,29 +1,43 @@
-import { Connection, ObjectType } from "typeorm";
+import { Connection, ObjectType, FindConditions } from "typeorm";
 import Manager from "./manager";
+import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
+
+const DEFAULT_PAGE_SIZE = 20;
+export type DeleteResponse = {
+  deleted: any[];
+  total: number;
+};
 
 export default class ModelUpdater<Entity> extends Manager<Entity> {
   constructor(type: ObjectType<Entity>) {
     super(type);
   }
 
-  async insert(record = {} as Entity): Promise<any> {
+  async insert(record = {} as Entity | Entity[]): Promise<Entity | Entity[]> {
     const db: Connection = await this.connect;
-    const validated = this._validateFields(record, db);
-    if (validated !== true) {
-      throw new Error(
-        `The following fields are not valid on type <${this.type.name}>: ${validated}`
-      );
-    }
-    console.log(`Creating new ${this.type.name} with params`, record);
-    return db.manager
-      .insert(this.type, record)
-      .then((res) => Object.assign({}, record, res.generatedMaps[0]))
+    // console.log(`Creating new ${this.type.name} with params`, record);
+    let entities = Array.isArray(record) ? record : [record];
+    entities.forEach((e) => {
+      const validated = this._validateFields(e, db);
+      if (validated !== true) {
+        throw new Error(
+          `The following fields are not valid on type <${this.type.name}>: [${validated}]`
+        );
+      }
+    });
+    return db
+      .getRepository(this.type)
+      .save(entities)
+      .then((res: Entity[]) => (Array.isArray(record) ? res : res[0]))
       .catch((err) => {
         throw err;
       });
   }
 
-  async update(updateFields: Entity, condition = {} as Entity): Promise<any> {
+  async update(
+    updateFields: Partial<Entity>,
+    condition = {} as Partial<Entity>
+  ): Promise<Entity[]> {
     const db: Connection = await this.connect;
 
     const validated = this._validateFields(updateFields, db);
@@ -34,35 +48,62 @@ export default class ModelUpdater<Entity> extends Manager<Entity> {
     }
 
     const queryFilters = this._buildWhereClause(condition, db);
-    console.log(`Updating ${this.type.name} with params`, queryFilters);
     if (!queryFilters || JSON.stringify(queryFilters) === "{}") {
       throw new Error(
         `You must specify valid query parameters for an update operation, to avoid modifying all rows in your database table in error`
       );
     }
-    return db.manager
-      .update(this.type, queryFilters, updateFields)
-      .then((res) => res.raw.affectedRows)
+    const fetchAffectedRows = async () => {
+      return db.getRepository(this.type).find(queryFilters);
+    };
+    return db
+      .getRepository(this.type)
+      .update(
+        queryFilters as FindConditions<Entity>,
+        updateFields as QueryDeepPartialEntity<Entity>
+      )
+      .then((res) => {
+        return fetchAffectedRows();
+      })
       .catch((err) => {
         throw err;
       });
   }
 
-  async delete(params = {} as Record<string, any>): Promise<number | void> {
+  async delete(params = {} as Record<string, any>): Promise<DeleteResponse> {
     const db: Connection = await this.connect;
-    let queryFilters = this._buildWhereClause(params, db);
-    console.log(`Deleting ${this.type.name} with params`, queryFilters);
+    let where = this._buildWhereClause(params, db);
+    const repo = db.getRepository(this.type);
 
-    if (!queryFilters || JSON.stringify(queryFilters) === "{}") {
+    if (!where || JSON.stringify(where) === "{}") {
       throw new Error(
         `You must specify valid query parameters for a delete operation, to avoid clearing out your database table in error`
       );
     }
 
+    let deleteCandidates: any[];
+    deleteCandidates = await repo.findAndCount({
+      where,
+      take: DEFAULT_PAGE_SIZE,
+    });
+
+    if (deleteCandidates[1] === 0) {
+      throw new Error(`No records matching the condition passed in`);
+    }
+
     // @ts-ignore
-    return db.manager
-      .delete(this.type, queryFilters)
-      .then((res) => res.affected)
+    return repo
+      .delete(where as FindConditions<Entity>)
+      .then(async () => {
+        const deleteCheck = await repo.count(where);
+        if (deleteCheck === 0) {
+          return {
+            deleted: deleteCandidates[0],
+            total: deleteCandidates[1],
+          };
+        }
+        throw new Error(`Failed to delete records`);
+      })
       .catch((err) => {
         throw err;
       });

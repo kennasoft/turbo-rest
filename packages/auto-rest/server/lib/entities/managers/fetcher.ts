@@ -25,17 +25,21 @@ export default class ModelFetcher<Entity> extends Manager<Entity> {
         this._pickAttributes(params._select_, db)
       );
     }
-    return db.manager
-      .findOne(this.type, queryFilters)
+    return db
+      .getRepository(this.type)
+      .findOne(queryFilters)
       .then((obj: any) => obj)
-      .catch((err: Error) => console.error(err));
+      .catch((err: Error) => {
+        throw err;
+      });
   }
 
   async count(params = {} as Record<string, any>): Promise<number | void> {
     const db: Connection = await this.connect;
     let queryFilters = { where: this._buildWhereClause(params, db) };
-    return db.manager
-      .count(this.type, queryFilters)
+    return db
+      .getRepository(this.type)
+      .count(queryFilters)
       .then((total: number) => total)
       .catch((err: Error) => console.error(err));
   }
@@ -80,10 +84,11 @@ export default class ModelFetcher<Entity> extends Manager<Entity> {
       );
     }
 
-    console.log(queryFilters);
+    // console.log(queryFilters);
 
-    return db.manager
-      .findAndCount(this.type, queryFilters)
+    return db
+      .getRepository(this.type)
+      .findAndCount(queryFilters)
       .then((listOfItems: any[]) => {
         const resp = {
           total: listOfItems[1],

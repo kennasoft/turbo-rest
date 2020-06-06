@@ -18,6 +18,7 @@ import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
 import dbConn from "../../utils/db";
 import { intTypes, floatTypes, dateTypes } from "../../utils/type-mappings";
+import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 export default class Manager<Entity> {
   connect: Promise<Connection>;
@@ -45,14 +46,17 @@ export default class Manager<Entity> {
     params = {} as Record<string, any>,
     db: Connection
   ): boolean | string[] {
-    const columnMeta: ColumnMetadata[] = db.getMetadata(this.type).columns;
-    const columnNames: string[] = columnMeta.map(
+    const metadata = db.getMetadata(this.type);
+    const relationNames: string[] = metadata.relations.map(
+      (rel: RelationMetadata) => rel.propertyName
+    );
+    const columnNames: string[] = metadata.columns.map(
       (col: ColumnMetadata) => col.propertyName
     );
 
     const invalidFields: string[] = [];
     for (const key in params) {
-      if (!columnNames.includes(key)) {
+      if (!columnNames.includes(key) && !relationNames.includes(key)) {
         invalidFields.push(key);
       }
     }
@@ -184,7 +188,7 @@ export default class Manager<Entity> {
         : [value];
     if (dateTypes.includes(sqlType as string) || sqlType === Date) {
       val = val.map((v: string) => {
-        if (String.prototype.toLowerCase.call(v) === "null") {
+        if (v === null || String.prototype.toLowerCase.call(v) === "null") {
           return IsNull();
         }
         let theDate;
@@ -200,7 +204,7 @@ export default class Manager<Entity> {
       floatTypes.includes(sqlType as string)
     ) {
       val = val.map((v: string) => {
-        if (String.prototype.toLowerCase.call(val[0]) === "null") {
+        if (v === null || String.prototype.toLowerCase.call(v) === "null") {
           return IsNull();
         }
         const intVal = String.prototype.includes.call(v, ".")
@@ -213,7 +217,7 @@ export default class Manager<Entity> {
       });
     } else if (
       val.length === 1 &&
-      String.prototype.toLowerCase.call(val[0]) === "null"
+      (val[0] === null || String.prototype.toLowerCase.call(val[0]) === "null")
     ) {
       val[0] = IsNull();
     }
