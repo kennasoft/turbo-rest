@@ -36,7 +36,7 @@ class Pet {
     default: () => "'[]'",
     comment: "a list of photos of the pet",
   })
-  photoUrlsJSON?: string;
+  photoUrlsJSON?: string | null;
 
   public get photoUrls() {
     if (this.photoUrlsJSON) return JSON.parse(this.photoUrlsJSON);
@@ -48,11 +48,13 @@ class Pet {
     else this.photoUrlsJSON = undefined;
   }
 
-  @ManyToOne(() => Category, (category) => category.pets)
+  @ManyToOne(() => Category, (category) => category.pets, {
+    cascade: ["insert", "update"],
+  })
   @JoinColumn({ name: "category_id" })
-  public category?: Category;
+  public category?: Category | null;
 
-  @ManyToMany(() => Tag, (tag) => tag.pets)
+  @ManyToMany(() => Tag, (tag) => tag.pets, { cascade: ["insert", "update"] })
   @JoinTable({
     name: "pets_tags",
     joinColumn: { name: "pet_id" },

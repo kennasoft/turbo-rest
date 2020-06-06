@@ -21,6 +21,20 @@ export const initializeDatabase = async (): Promise<Connection> => {
   return dbConn;
 };
 
+export const clearData = async () => {
+  const db = await dbConn;
+  const entities = [Pet, Category, Tag];
+  const entitiesMeta = entities.map((entity) => db.getMetadata(entity));
+  try {
+    for (const meta of entitiesMeta) {
+      const repository = await db.getRepository(meta.name);
+      await repository.query(`DELETE FROM \`${meta.tableName}\`;`);
+    }
+  } catch (error) {
+    throw new Error(`ERROR: Cleaning test db: ${error}`);
+  }
+};
+
 async function insertOrIgnore<Entity>(
   entity: ObjectType<Entity>,
   payload: Entity
@@ -49,6 +63,7 @@ export const loadData = async (): Promise<any[]> => {
   const mockData = require("../../data/petdata.json");
   // const categories: Category[] = [],
   // tags: Tag[] = [];
+  await clearData();
   const promises: Promise<Pet>[] = mockData.map(async (petData: Pet) => {
     petData.tags?.map(async (tag: any) => {
       tag.id = (await insertOrIgnore(Tag, tag)).id;
