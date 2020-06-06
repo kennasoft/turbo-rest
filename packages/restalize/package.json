@@ -1,6 +1,6 @@
 {
   "name": "restalize",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Robust REST API generator. Generates a full typescript express-js REST API project from just a relational database connection",
   "main": "index.js",
   "repository": {
@@ -36,13 +36,13 @@
   "author": "Ikenna Okonkwo<ikenna.okonkwo@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "restalize-template": "^1.0.0",
     "chalk": "^4.0.0",
     "commander": "^5.1.0",
     "cpy": "^8.1.0",
     "cross-spawn": "^7.0.2",
     "make-dir": "^3.1.0",
     "prompts": "^2.3.2",
+    "restalize-template": "^1.0.0",
     "rimraf": "^3.0.2"
   },
   "devDependencies": {
