@@ -3,6 +3,7 @@ import cpy from "cpy";
 import fs from "fs";
 import makeDir from "make-dir";
 import path from "path";
+import replace from "replace-in-file";
 import rimraf from "rimraf";
 
 import { isFolderEmpty } from "./helpers/is-folder-empty";
@@ -11,7 +12,6 @@ import { shouldUseYarn } from "./helpers/should-use-yarn";
 import { getOnline } from "./helpers/is-online";
 import { install } from "./helpers/install";
 import { changeLanguage } from "./helpers/change-lang";
-import "./helpers/link-template-files";
 
 export type JavascriptFlavor = "typescript" | "es2015" | "esnext";
 export type HttpServerTypes = "express" | "hapi";
@@ -53,8 +53,8 @@ export async function generateApi({
   const root = path.resolve(appPath as string);
   const appName = path.basename(root);
   const packageJSON = npmConfig;
-  const hapiDependencies = ["@hapi/hapi", "@hapi/inert"];
-  const expressDependencies = ["express", "cors", "body-parser"];
+  const hapiDependencies = ["@hapi/hapi", "@hapi/inert", "husky"];
+  const expressDependencies = ["express", "cors", "body-parser", "husky"];
 
   await makeDir(root);
   if (!isFolderEmpty(root, appName)) {
@@ -97,6 +97,16 @@ export async function generateApi({
     }
     delete packageJSON.devDependencies[`@types/${depType}`];
   });
+  ["main", "files", "repository", "husky", "license"].forEach(
+    (key: string) => delete packageJSON[key]
+  );
+  [
+    "test:watch",
+    "version:patch",
+    "version:minor",
+    "version:major",
+    "deploy",
+  ].forEach((key: string) => delete packageJSON.scripts[key]);
 
   fs.writeFileSync(
     "package.json",
@@ -116,6 +126,9 @@ export async function generateApi({
   await install(root, null, { useYarn, isOnline });
   console.log();
 
+  console.log("copying ** from ", path.join(__dirname, "templates", template));
+  console.log();
+
   await cpy("**", root, {
     parents: true,
     cwd: path.join(__dirname, "templates", template),
@@ -130,21 +143,27 @@ export async function generateApi({
     rimraf(`${root}/server/routes.hapi.ts`, noop);
     rimraf(`${root}/server/lib/controllers/api/hapi.ts`, noop);
   } else {
-    fs.rename(
-      `${root}/server/server.hapi.ts`,
-      `${root}/server/server.ts`,
-      (err) => err && console.error(err)
-    );
-    fs.rename(
-      `${root}/server/routes.hapi.ts`,
-      `${root}/server/routes.ts`,
-      (err) => err && console.error(err)
-    );
-    fs.rename(
-      `${root}/server/lib/controllers/api/hapi.ts`,
-      `${root}/server/lib/controllers/api/index.ts`,
-      (err) => err && console.error(err)
-    );
+    try {
+      fs.renameSync(
+        `${root}/server/server.hapi.ts`,
+        `${root}/server/server.ts`
+      );
+      replace.sync({
+        files: `${root}/server/server.ts`,
+        from: /.\/routes.hapi/gm,
+        to: "./routes",
+      });
+      fs.renameSync(
+        `${root}/server/routes.hapi.ts`,
+        `${root}/server/routes.ts`
+      );
+      fs.renameSync(
+        `${root}/server/lib/controllers/api/hapi.ts`,
+        `${root}/server/lib/controllers/api/index.ts`
+      );
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   const langChangeFailed = await changeLanguage(language);
@@ -168,6 +187,11 @@ export async function generateApi({
   console.log();
   console.log(purple(`  ${displayedCommand} ${useYarn ? "" : "run "}build`));
   console.log("    Builds the app for production.");
+  console.log();
+  console.log(
+    purple(`  ${displayedCommand} ${useYarn ? "" : "run "}test --verbose`)
+  );
+  console.log("    Runs all tests on the app.");
   console.log();
   console.log(purple(`  ${displayedCommand} start`));
   console.log("    Runs the built app in production mode.");
