@@ -11,8 +11,7 @@
       "packages/*"
     ],
     "nohoist": [
-      "**@zeit/ncc",
-      "**restalize-template"
+      "**@zeit/ncc"
     ]
   },
   "author": "Ikenna Okonkwo<ikenna.okonkwo@gmail.com>",
@@ -22,6 +21,8 @@
     "bootstrap": "lerna bootstrap",
     "test": "lerna run test",
     "build": "lerna run build",
+    "build-t": "cd packages/restalize-template && yarn build",
+    "build-r": "cd packages/restalize && yarn build",
     "deploy": "lerna run deploy",
     "version:patch": "yarn version --patch && lerna run version:patch",
     "version:minor": "yarn version --minor && lerna run version:minor",
