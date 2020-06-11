@@ -43,7 +43,7 @@ describe("generateApi", () => {
     mockStdOut.mockRestore();
   });
 
-  it("should fail if root arg is not specified", async () => {
+  it("should fail if root directory arg is not specified", async () => {
     await generateApi({ ...args, appPath: "" });
     expect(mockExit).toHaveBeenCalledWith(EXIT_CODES.NO_APP_PATH_SPECIFIED);
     mockExit.mockRestore();

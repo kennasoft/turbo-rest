@@ -1,18 +1,22 @@
 {
   "name": "root",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "private": true,
   "repository": {
     "type": "git",
     "url": "git@github.com:kennasoft/restalize.git"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn test"
+    }
   },
   "workspaces": {
     "packages": [
       "packages/*"
     ],
     "nohoist": [
-      "**@zeit/ncc",
-      "**restalize-template"
+      "**@zeit/ncc"
     ]
   },
   "author": "Ikenna Okonkwo<ikenna.okonkwo@gmail.com>",
@@ -22,12 +26,15 @@
     "bootstrap": "lerna bootstrap",
     "test": "lerna run test",
     "build": "lerna run build",
+    "build-t": "cd packages/restalize-template && yarn build",
+    "build-r": "cd packages/restalize && yarn build",
     "deploy": "lerna run deploy",
     "version:patch": "yarn version --patch && lerna run version:patch",
     "version:minor": "yarn version --minor && lerna run version:minor",
     "version:major": "yarn version --major && lerna run version:major"
   },
   "devDependencies": {
+    "husky": "^4.2.5",
     "lerna": "^3.20.2"
   }
 }

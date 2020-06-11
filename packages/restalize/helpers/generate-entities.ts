@@ -23,17 +23,16 @@ export type TmgConfig = {
 };
 
 const makeEnvFile = (config: TmgConfig, root: string) => {
-  let envFile = `
-TYPEORM_CONNECTION=${config.engine}
-TYPEORM_HOST=${config.host}
-TYPEORM_USERNAME=${config.user}
-TYPEORM_PASSWORD=${config.pass}
-TYPEORM_DATABASE=${config.database}
-TYPEORM_PORT=${config.port}
+  let envFile = `TYPEORM_CONNECTION=${config.engine || ""}
+TYPEORM_HOST=${config.host || ""}
+TYPEORM_USERNAME=${config.user || ""}
+TYPEORM_PASSWORD=${config.pass || ""}
+TYPEORM_DATABASE=${config.database || ""}
+TYPEORM_PORT=${config.port || ""}
 TYPEORM_SYNCHRONIZE=false
 TYPEORM_LOGGING=false
 TYPEORM_ENTITIES=./dist/lib/entities/*.js,./server/lib/entities/*.ts
-  `;
+`;
 
   fs.writeFileSync(`${root}/.env`, envFile, "utf8");
 };
@@ -97,7 +96,7 @@ export async function generateEntities(
       } else {
         try {
           let conf: TmgConfig = Object.assign({}, config);
-          if (!conf.user && !conf.pass) {
+          if (conf.engine !== "sqlite" && !conf.user && !conf.pass) {
             const ormconfig = JSON.parse(
               fs.readFileSync(`${entityPath}/ormconfig.json`, "utf8")
             )[0];

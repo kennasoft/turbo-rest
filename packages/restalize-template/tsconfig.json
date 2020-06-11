@@ -6,6 +6,8 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": false,
+    "allowJs": true,
+    "declaration": true,
     "strictPropertyInitialization": false,
     "experimentalDecorators": true,
     "outDir": "./dist",
