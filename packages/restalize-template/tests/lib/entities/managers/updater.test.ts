@@ -35,8 +35,8 @@ describe("ModelUpdater", () => {
   });
 
   it("should insert a new Entity instance and return it with an id", async () => {
-    const firstPet = petdata[0];
-    const newPet = (await updater.insert(new Pet(firstPet))) as Pet;
+    const firstPet = new Pet(petdata[0]);
+    const newPet = (await updater.insert(firstPet)) as Pet;
     expect(newPet.id).toBe(1);
   });
 

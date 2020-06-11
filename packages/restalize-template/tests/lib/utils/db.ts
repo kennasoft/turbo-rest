@@ -6,16 +6,6 @@ import Tag from "../entities/Tag";
 import Pet from "../entities/Pet";
 import Category from "../entities/Category";
 
-export type DeferredExecution = {
-  run: Function;
-  args?: any[];
-};
-
-export type QExecutor = {
-  execute: Function;
-  interval: number | null;
-};
-
 export const initializeDatabase = async (): Promise<Connection> => {
   // console.log("connecting to database");
   return dbConn;
@@ -84,44 +74,6 @@ export const loadData = async (): Promise<any[]> => {
   const results = await savePets(pets);
   return results;
 };
-
-export const dbQueue = {
-  waiting: [] as DeferredExecution[],
-  busy: false,
-};
-
-export const Executor: QExecutor = {
-  execute: async (job?: Function, args?: any[]): Promise<any> => {
-    console.log(dbQueue);
-    return new Promise(async (resolve, reject) => {
-      if (job) {
-        dbQueue.waiting.push({ run: job, args });
-      }
-      if (!dbQueue.busy && dbQueue.waiting.length > 0) {
-        const next = dbQueue.waiting.shift();
-        dbQueue.busy = true;
-        return next?.run
-          .apply(null, next.args)
-          .then((res: any) => {
-            console.log(
-              `finished running ${next.run.name} with args ${JSON.stringify(
-                next.args
-              )}`
-            );
-            dbQueue.busy = false;
-            return resolve(res);
-          })
-          .catch((err: any) => {
-            dbQueue.busy = false;
-            return reject(err);
-          })
-          .finally(() => (dbQueue.busy = false));
-      }
-    });
-  },
-  interval: null,
-};
-// Executor.interval = setInterval(Executor.execute, 100);
 
 export const teardownDatabase = async (conn: Connection): Promise<void> => {
   // console.log("Closing connection");
