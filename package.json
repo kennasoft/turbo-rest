@@ -6,6 +6,11 @@
     "type": "git",
     "url": "git@github.com:kennasoft/restalize.git"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn test"
+    }
+  },
   "workspaces": {
     "packages": [
       "packages/*"
@@ -29,6 +34,7 @@
     "version:major": "yarn version --major && lerna run version:major"
   },
   "devDependencies": {
+    "husky": "^4.2.5",
     "lerna": "^3.20.2"
   }
 }
