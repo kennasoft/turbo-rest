@@ -1,5 +1,7 @@
 # RESTalize
 
+[![kennasoft](https://circleci.com/gh/kennasoft/restalize.svg?style=shield)](https://app.circleci.com/pipelines/gh/kennasoft/restalize) [![codecov](https://codecov.io/gh/kennasoft/restalize/branch/master/graph/badge.svg)](https://codecov.io/gh/kennasoft/restalize)
+
 Restalize is a robust Code generator that receives a relational database connection as input and creates a node.js-based REST api project in a specified folder.
 
 ## Installation
