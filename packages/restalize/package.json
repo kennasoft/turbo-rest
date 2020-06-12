@@ -1,6 +1,6 @@
 {
   "name": "restalize",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "Robust REST API generator. Generates a full typescript express-js REST API project from just a relational database connection",
   "main": "index.js",
   "repository": {
