@@ -1,4 +1,4 @@
-# RESTalize v1.1.3
+# RESTalize
 
 Restalize is a robust Code generator that receives a relational database connection as input and creates a node.js-based REST api project in a specified folder.
 
