@@ -40,7 +40,7 @@ restalize my-rest-api
 
 When invoked as above with no flags other than the directory name, the underlying entity generation module, [typeorm-model-generator](https://www.npmjs.com/package/typeorm-model-generator) will prompt you for parameters like database-name, user, password, host, port etc.
 
-For a full description of usage type `npx restalize --help`, to see the below guide in your terminal:
+For a full description of usage, type `npx restalize --help`, to see the below guide in your terminal:
 
 ```sh
 Usage: restalize <project-folder> [options]
