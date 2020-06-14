@@ -4,6 +4,18 @@
 
 Restalize is a robust Code generator that receives a relational database connection as input and creates a node.js-based REST api project in a specified folder.
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Installation](#installation)
+  - [Global installation](#global-installation)
+- [Running Restalize](#running-restalize)
+  - [Using npx](#using-npx)
+  - [Using global install](#using-global-install)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Installation
 
 Although you can install the package globally and execute it as a binary, it is recommended that you run it using `npx`

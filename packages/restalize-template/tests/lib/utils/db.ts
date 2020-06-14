@@ -51,26 +51,20 @@ async function savePets(pets: Pet[]): Promise<any> {
 
 export const loadData = async (): Promise<any[]> => {
   const mockData = require("../../data/petdata.json");
-  // const categories: Category[] = [],
-  // tags: Tag[] = [];
   await clearData();
   const promises: Promise<Pet>[] = mockData.map(async (petData: Pet) => {
     petData.tags?.map(async (tag: any) => {
       tag.id = (await insertOrIgnore(Tag, tag)).id;
-      // tags.push(tag);
     });
     if (petData.category) {
       petData.category.id = (
         await insertOrIgnore(Category, petData.category)
       )?.id;
-      // categories.push(petData.category);
     }
     const pet = new Pet(petData);
     return pet;
   });
   const pets = await Promise.all(promises);
-  // console.log(`categories: ${JSON.stringify(categories)}`);
-  // console.log(`tags: ${JSON.stringify(tags)}`);
   const results = await savePets(pets);
   return results;
 };

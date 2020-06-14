@@ -22,8 +22,8 @@ import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 export default class Manager<Entity> {
   connect: Promise<Connection>;
-  type: ObjectType<Entity>;
-  constructor(type: ObjectType<Entity>) {
+  type: { new (init?: Partial<Entity>): Entity };
+  constructor(type: { new (init?: Partial<Entity>): Entity }) {
     this.type = type;
     this.connect = dbConn;
   }

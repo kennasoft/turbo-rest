@@ -1,5 +1,4 @@
 import Hapi from "@hapi/hapi";
-import { ObjectType } from "typeorm";
 import ModelFetcher from "../../entities/managers/fetcher";
 import ModelUpdater from "../../entities/managers/updater";
 
@@ -8,7 +7,9 @@ function handleError(err: Error, h: Hapi.ResponseToolkit) {
   return h.response({ status: "error", message: err.message }).code(500);
 }
 
-export function listEntity<Entity>(type: ObjectType<Entity>) {
+export function listEntity<Entity>(type: {
+  new (init?: Partial<Entity>): Entity;
+}) {
   return async function handleRequest(
     request: Hapi.Request,
     h: Hapi.ResponseToolkit
@@ -24,7 +25,9 @@ export function listEntity<Entity>(type: ObjectType<Entity>) {
   };
 }
 
-export function fetchEntity<Entity>(type: ObjectType<Entity>) {
+export function fetchEntity<Entity>(type: {
+  new (init?: Partial<Entity>): Entity;
+}) {
   return async function handleRequest(
     request: Hapi.Request,
     h: Hapi.ResponseToolkit
@@ -50,7 +53,9 @@ export function fetchEntity<Entity>(type: ObjectType<Entity>) {
   };
 }
 
-export function createEntity<Entity>(type: ObjectType<Entity>) {
+export function createEntity<Entity>(type: {
+  new (init?: Partial<Entity>): Entity;
+}) {
   return async function handleRequest(
     request: Hapi.Request,
     h: Hapi.ResponseToolkit
@@ -67,7 +72,9 @@ export function createEntity<Entity>(type: ObjectType<Entity>) {
   };
 }
 
-export function updateEntity<Entity>(type: ObjectType<Entity>) {
+export function updateEntity<Entity>(type: {
+  new (init?: Partial<Entity>): Entity;
+}) {
   return async function handleRequest(
     request: Hapi.Request,
     h: Hapi.ResponseToolkit
@@ -104,7 +111,9 @@ export function updateEntity<Entity>(type: ObjectType<Entity>) {
   };
 }
 
-export function deleteEntity<Entity>(type: ObjectType<Entity>) {
+export function deleteEntity<Entity>(type: {
+  new (init?: Partial<Entity>): Entity;
+}) {
   return async function handleRequest(
     request: Hapi.Request,
     h: Hapi.ResponseToolkit
