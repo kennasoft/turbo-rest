@@ -10,7 +10,7 @@ export type ApiListResponse<Entity> = {
 const DEFAULT_PAGE_SIZE = 20;
 
 export default class ModelFetcher<Entity> extends Manager<Entity> {
-  constructor(type: ObjectType<Entity>) {
+  constructor(type: { new (init?: Partial<Entity>): Entity }) {
     super(type);
   }
 
@@ -28,7 +28,7 @@ export default class ModelFetcher<Entity> extends Manager<Entity> {
     return db
       .getRepository(this.type)
       .findOne(queryFilters)
-      .then((obj: any) => obj)
+      .then((obj: any) => new this.type(obj))
       .catch((err: Error) => {
         throw err;
       });
@@ -93,7 +93,9 @@ export default class ModelFetcher<Entity> extends Manager<Entity> {
         const resp = {
           total: listOfItems[1],
           subtotal: 0,
-          rows: listOfItems[0],
+          rows: listOfItems[0].map(
+            (raw: Partial<Entity>) => new this.type(raw)
+          ),
         };
         if (listOfItems[1]) {
           resp.subtotal = resp.rows.length;

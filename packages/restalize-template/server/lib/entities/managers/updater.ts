@@ -1,4 +1,4 @@
-import { Connection, ObjectType, FindConditions } from "typeorm";
+import { Connection, FindConditions } from "typeorm";
 import Manager from "./manager";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 
@@ -9,26 +9,31 @@ export type DeleteResponse = {
 };
 
 export default class ModelUpdater<Entity> extends Manager<Entity> {
-  constructor(type: ObjectType<Entity>) {
+  constructor(type: { new (init?: Partial<Entity>): Entity }) {
     super(type);
   }
 
   async insert(record = {} as Entity | Entity[]): Promise<Entity | Entity[]> {
     const db: Connection = await this.connect;
     // console.log(`Creating new ${this.type.name} with params`, record);
-    let entities = Array.isArray(record) ? record : [record];
-    entities.forEach((e) => {
-      const validated = this._validateFields(e, db);
+    let records = Array.isArray(record) ? record : [record];
+    let entities = records.map((rec) => {
+      const validated = this._validateFields(rec, db);
       if (validated !== true) {
         throw new Error(
           `The following fields are not valid on type <${this.type.name}>: [${validated}]`
         );
       }
+      return new this.type(rec);
     });
     return db
       .getRepository(this.type)
       .save(entities)
-      .then((res: Entity[]) => (Array.isArray(record) ? res : res[0]))
+      .then((res: Entity[]) =>
+        Array.isArray(record)
+          ? res.map((r) => new this.type(r))
+          : new this.type(res[0])
+      )
       .catch((err) => {
         throw err;
       });

@@ -1,5 +1,4 @@
 import express from "express";
-import { ObjectType } from "typeorm";
 import ModelFetcher from "../../entities/managers/fetcher";
 import ModelUpdater from "../../entities/managers/updater";
 
@@ -8,7 +7,9 @@ function handleError(err: Error, res: express.Response) {
   return res.status(500).send({ status: "error", message: err.message });
 }
 
-export function listEntity<Entity>(type: ObjectType<Entity>): express.Handler {
+export function listEntity<Entity>(type: {
+  new (init?: Partial<Entity>): Entity;
+}): express.Handler {
   return async function handleRequest(
     req: express.Request,
     res: express.Response
@@ -24,7 +25,9 @@ export function listEntity<Entity>(type: ObjectType<Entity>): express.Handler {
   };
 }
 
-export function fetchEntity<Entity>(type: ObjectType<Entity>): express.Handler {
+export function fetchEntity<Entity>(type: {
+  new (init?: Partial<Entity>): Entity;
+}): express.Handler {
   return async function handleRequest(
     req: express.Request,
     res: express.Response
@@ -48,9 +51,9 @@ export function fetchEntity<Entity>(type: ObjectType<Entity>): express.Handler {
   };
 }
 
-export function createEntity<Entity>(
-  type: ObjectType<Entity>
-): express.Handler {
+export function createEntity<Entity>(type: {
+  new (init?: Partial<Entity>): Entity;
+}): express.Handler {
   return async function handleRequest(
     req: express.Request,
     res: express.Response
@@ -67,9 +70,9 @@ export function createEntity<Entity>(
   };
 }
 
-export function updateEntity<Entity>(
-  type: ObjectType<Entity>
-): express.Handler {
+export function updateEntity<Entity>(type: {
+  new (init?: Partial<Entity>): Entity;
+}): express.Handler {
   return async function handleRequest(
     req: express.Request,
     res: express.Response
@@ -97,9 +100,9 @@ export function updateEntity<Entity>(
   };
 }
 
-export function deleteEntity<Entity>(
-  type: ObjectType<Entity>
-): express.Handler {
+export function deleteEntity<Entity>(type: {
+  new (init?: Partial<Entity>): Entity;
+}): express.Handler {
   return async function handleRequest(
     req: express.Request,
     res: express.Response
