@@ -9,11 +9,12 @@ This is a helper module for [Restalize](https://github.com/kennasoft/restalize/t
 
 **Table of Contents** _generated with [DocToc](https://github.com/thlorenz/doctoc)_
 
-- [Restalize Template](#restalize-template)
-  - [Cloning and using the repo](#cloning-and-using-the-repo)
-  - [How to use the API:](#how-to-use-the-api)
-    - [1. Getting all Entity instances](#1-getting-all-entity-instances)
-    - [2. Getting entities with simple query parameters](#2-getting-entities-with-simple-query-parameters)
+- [Cloning and using the repo](#cloning-and-using-the-repo)
+- [How to use the API:](#how-to-use-the-api)
+  - [1. Getting all Entity instances](#1-getting-all-entity-instances)
+  - [2. Getting entities with simple query parameters](#2-getting-entities-with-simple-query-parameters)
+  - [3. Getting entities with more complex query parameters](#3-getting-entities-with-more-complex-query-parameters)
+    - [3.1 REST API operators](#31-rest-api-operators)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
