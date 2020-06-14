@@ -1,5 +1,7 @@
 # RESTalize
 
+[![kennasoft](https://circleci.com/gh/kennasoft/restalize.svg?style=shield)](https://app.circleci.com/pipelines/gh/kennasoft/restalize) [![codecov](https://codecov.io/gh/kennasoft/restalize/branch/master/graph/badge.svg)](https://codecov.io/gh/kennasoft/restalize)
+
 Restalize is a robust Code generator that receives a relational database connection as input and creates a node.js-based REST api project in a specified folder.
 
 ## Installation
@@ -38,7 +40,7 @@ restalize my-rest-api
 
 When invoked as above with no flags other than the directory name, the underlying entity generation module, [typeorm-model-generator](https://www.npmjs.com/package/typeorm-model-generator) will prompt you for parameters like database-name, user, password, host, port etc.
 
-For a full description of usage type `npx restalize --help`, to see the below guide in your terminal:
+For a full description of usage, type `npx restalize --help`, to see the below guide in your terminal:
 
 ```sh
 Usage: restalize <project-folder> [options]

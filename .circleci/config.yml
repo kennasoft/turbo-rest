@@ -1,9 +1,12 @@
-version: 2
+version: 2.1
 
 defaults: &defaults
   working_directory: ~/workspace
   docker:
     - image: circleci/node:12.16.3
+
+orbs:
+  codecov: codecov/codecov@1.0.2
 
 jobs:
   test:
@@ -26,7 +29,8 @@ jobs:
       - run:
           name: Run tests
           command: yarn test
-
+      - codecov/upload:
+          file: packages/restalize-template/coverage/coverage-final.json
       - save_cache:
           paths:
             - node_modules
