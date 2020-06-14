@@ -7,7 +7,6 @@ This is a helper module for [Restalize](https://github.com/kennasoft/restalize/t
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-**Table of Contents** _generated with [DocToc](https://github.com/thlorenz/doctoc)_
 
 - [Cloning and using the repo](#cloning-and-using-the-repo)
 - [How to use the API:](#how-to-use-the-api)

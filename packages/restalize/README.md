@@ -7,14 +7,12 @@ Restalize is a robust Code generator that receives a relational database connect
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-**Table of Contents** _generated with [DocToc](https://github.com/thlorenz/doctoc)_
 
-- [RESTalize](#restalize)
-  - [Installation](#installation)
-    - [Global installation](#global-installation)
-  - [Running Restalize](#running-restalize)
-    - [Using npx](#using-npx)
-    - [Using global install](#using-global-install)
+- [Installation](#installation)
+  - [Global installation](#global-installation)
+- [Running Restalize](#running-restalize)
+  - [Using npx](#using-npx)
+  - [Using global install](#using-global-install)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
