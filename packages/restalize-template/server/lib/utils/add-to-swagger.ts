@@ -9,16 +9,16 @@ import dbConn from "./db";
 import { mapSQLTypeToSwagger } from "./type-mappings";
 
 export type TSwaggerJSON = {
-  swagger: string;
-  info: {
+  swagger?: string;
+  info?: {
     description: string;
     title: string;
     version: string;
   };
-  host: string;
-  basePath: string;
+  host?: string;
+  basePath?: string;
   tags: Record<string, any>[];
-  schemes: string[];
+  schemes?: string[];
   paths: Record<string, any>;
   definitions: Record<string, any>;
 };
@@ -44,19 +44,33 @@ const queue = {
   busy: false,
 };
 
-let timeout: NodeJS.Timeout;
+const patchQueue = {
+  waiting: [] as TSwaggerJSON[],
+  busy: false,
+};
 
 export const patchSwagger = async (
-  swaggerJSON: Record<string, any>
+  swaggerJSON: TSwaggerJSON
 ): Promise<TSwaggerJSON | void> => {
   const swaggerFile = path.join(__dirname, "..", "..", "docs", "swagger.json");
 
-  if (queue.waiting.length || queue.busy) {
+  if (
+    (queue.waiting.length || queue.busy) &&
+    !patchQueue.waiting.includes(swaggerJSON)
+  ) {
     //defer for later if promise queue is not empty
-    timeout = setTimeout(() => patchSwagger(swaggerJSON), 500);
+    patchQueue.waiting.push(swaggerJSON);
     return;
   }
+
+  if (patchQueue.busy && !patchQueue.waiting.includes(swaggerJSON)) {
+    patchQueue.waiting.push(swaggerJSON);
+    return;
+  }
+
   let currentSwagger: TSwaggerJSON;
+
+  patchQueue.busy = true;
 
   return new Promise((resolve, reject) => {
     //@ts-ignore
@@ -81,13 +95,13 @@ export const patchSwagger = async (
             ...swaggerJSON.definitions,
           },
         };
-        swaggerJSON.tags.map((tag: any) => {
-          const exists = currentSwagger.tags.find((t) => t.name === tag.name);
+        swaggerJSON.tags?.map((tag: any) => {
+          const exists = currentSwagger.tags?.find((t) => t.name === tag.name);
           if (exists) {
             exists.name = tag.name;
             exists.description = tag.description;
           } else {
-            currentSwagger.tags.push(tag);
+            currentSwagger.tags?.push(tag);
           }
         });
         // overwrite file
@@ -96,6 +110,11 @@ export const patchSwagger = async (
           JSON.stringify(currentSwagger, null, 2),
           "utf8"
         );
+        patchQueue.busy = false;
+        if (patchQueue.waiting.length) {
+          const nextPatch = patchQueue.waiting.shift() as TSwaggerJSON;
+          return patchSwagger(nextPatch);
+        }
         return resolve(currentSwagger);
       }
     );
@@ -232,24 +251,46 @@ export default async function addToSwagger<Entity>(
           type: "string",
           example: "There was an error processing your request",
         },
+        code: {
+          type: "number",
+          example: 500,
+        },
+        type: {
+          type: "string",
+          example: "InternalServerError",
+        },
       },
     };
     switch (code) {
-      case 500:
-        resp.properties.message.example =
-          "There was an error processing your request";
-        return resp;
       case 400:
+        resp.properties.message.example = "Bad Request";
+        resp.properties.type.example = "BadRequestError";
+        resp.properties.code.example = 400;
+        return resp;
+      case 401:
         resp.properties.message.example = "Unauthorized access";
+        resp.properties.type.example = "UnauthorizedError";
+        resp.properties.code.example = 401;
+        return resp;
+      case 403:
+        resp.properties.message.example = "Forbidden";
+        resp.properties.type.example = "ForbiddenError";
+        resp.properties.code.example = 403;
         return resp;
       case 404:
         resp.properties.message.example = "Error: Record not found";
+        resp.properties.type.example = "NotFoundError";
+        resp.properties.code.example = 404;
+        return resp;
+      default:
         return resp;
     }
   };
 
   const errorSchema = {
     "400": getErrorObject(400),
+    "401": getErrorObject(401),
+    "403": getErrorObject(403),
     "404": getErrorObject(404),
     "500": getErrorObject(500),
   };
@@ -292,11 +333,11 @@ export default async function addToSwagger<Entity>(
           },
         },
         400: {
-          description: "Error: unauthorized access",
+          description: "Error: Bad Request",
           schema: errorSchema["400"],
         },
         404: {
-          description: `Error ${entity.name} not found`,
+          description: `Error: ${entity.name} not found`,
           schema: errorSchema["404"],
         },
       },

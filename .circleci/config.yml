@@ -31,6 +31,10 @@ jobs:
           command: yarn test
       - codecov/upload:
           file: packages/restalize-template/coverage/coverage-final.json
+          flags: template
+      - codecov/upload:
+          file: packages/restalize/coverage/coverage-final.json
+          flags: main
       - save_cache:
           paths:
             - node_modules
