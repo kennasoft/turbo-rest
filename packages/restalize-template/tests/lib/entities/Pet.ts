@@ -33,7 +33,6 @@ class Pet {
 
   @Column("text", {
     name: "photo_urls",
-    default: () => "'[]'",
     comment: "a list of photos of the pet",
   })
   photoUrlsJSON?: string | null;

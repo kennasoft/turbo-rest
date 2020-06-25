@@ -146,7 +146,7 @@ describe("swagger utils", () => {
             return callback(null, JSON.stringify(swaggerClone));
           });
 
-        const etraSwagger = {
+        const etraSwagger: TSwaggerJSON = {
           tags: [{ name: "Extra Tag", description: "An extra tag" }],
           paths: {
             "/new/api/path": {
@@ -154,6 +154,14 @@ describe("swagger utils", () => {
               post: { operationId: "postOperation" },
               put: { operationId: "putOperation" },
               delete: { operationId: "deleteOperation" },
+            },
+          },
+          definitions: {
+            ExtraDefinition: {
+              type: "object",
+              properties: {
+                name: "string",
+              },
             },
           },
         };

@@ -72,6 +72,7 @@ export const stringTypes = [
   "clob", // oracle, sqlite, sap
   "nclob", // oracle, sap
   "image", // mssql
+  "json", // mysql, mariadb
 ];
 
 export const dateTypes = [
