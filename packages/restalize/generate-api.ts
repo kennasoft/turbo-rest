@@ -34,6 +34,9 @@ export enum EXIT_CODES {
   LANGUAGE_CHANGE_FAILED = 10,
   PROJECT_FOLDER_NOT_EMPTY = 12,
   MODEL_GENERATOR_FAILED = 14,
+  PROJECT_DIRECTORY_ACCESS_DENIED = 16,
+  RENAME_FAILED = 18,
+  WRITE_PACKAGE_JSON_FAILED = 20,
 }
 
 const purple = chalk.hex("8a2be2");
@@ -56,7 +59,18 @@ export async function generateApi({
   const hapiDependencies = ["@hapi/hapi", "@hapi/inert", "husky"];
   const expressDependencies = ["express", "cors", "body-parser", "husky"];
 
-  await makeDir(root);
+  try {
+    await makeDir(root);
+  } catch (err) {
+    // if unable to create project dir, exit
+    console.error(
+      `${chalk.red(
+        "Unable to create project dir at ${root}. Stopping installation..."
+      )}`
+    );
+    return process.exit(EXIT_CODES.PROJECT_DIRECTORY_ACCESS_DENIED);
+  }
+
   if (!isFolderEmpty(root, appName)) {
     return process.exit(EXIT_CODES.PROJECT_FOLDER_NOT_EMPTY);
   }
@@ -85,6 +99,7 @@ export async function generateApi({
   process.chdir(root);
 
   packageJSON.name = appName;
+  packageJSON.version = "1.0.0";
   const unnecessaryDeps =
     httpServer === "express" ? hapiDependencies : expressDependencies;
   unnecessaryDeps.forEach((dep) => {
@@ -108,11 +123,16 @@ export async function generateApi({
     "deploy",
   ].forEach((key: string) => delete packageJSON.scripts[key]);
 
-  fs.writeFileSync(
-    "package.json",
-    JSON.stringify(packageJSON, null, 2),
-    "utf8"
-  );
+  try {
+    fs.writeFileSync(
+      "package.json",
+      JSON.stringify(packageJSON, null, 2),
+      "utf8"
+    );
+  } catch (err) {
+    console.error(chalk.red(err.message));
+    return process.exit(EXIT_CODES.WRITE_PACKAGE_JSON_FAILED);
+  }
 
   console.log(
     `Installing ${Object.keys(packageJSON.dependencies)
@@ -162,7 +182,8 @@ export async function generateApi({
         `${root}/server/lib/controllers/api/index.ts`
       );
     } catch (err) {
-      console.error(err);
+      console.error(chalk.red(err.message));
+      return process.exit(EXIT_CODES.RENAME_FAILED);
     }
   }
 
@@ -188,9 +209,7 @@ export async function generateApi({
   console.log(purple(`  ${displayedCommand} ${useYarn ? "" : "run "}build`));
   console.log("    Builds the app for production.");
   console.log();
-  console.log(
-    purple(`  ${displayedCommand} ${useYarn ? "" : "run "}test --verbose`)
-  );
+  console.log(purple(`  ${displayedCommand} ${useYarn ? "" : "run "}test`));
   console.log("    Runs all tests on the app.");
   console.log();
   console.log(purple(`  ${displayedCommand} start`));
