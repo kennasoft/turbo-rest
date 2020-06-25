@@ -33,7 +33,7 @@
     "version:minor": "lerna run version:minor",
     "version:major": "lerna run version:major",
     "dev-r": "cd packages/restalize && yarn dev",
-    "dev-rt": "cd packages/restalize-template && yarn dev"
+    "dev-t": "cd packages/restalize-template && yarn dev"
   },
   "devDependencies": {
     "husky": "^4.2.5",

@@ -1,12 +1,11 @@
 # RESTalize
 
-[![kennasoft](https://circleci.com/gh/kennasoft/restalize.svg?style=shield)](https://app.circleci.com/pipelines/gh/kennasoft/restalize) [![codecov](https://codecov.io/gh/kennasoft/restalize/branch/master/graph/badge.svg)](https://codecov.io/gh/kennasoft/restalize)
+[![kennasoft](https://circleci.com/gh/kennasoft/restalize.svg?style=shield)](https://app.circleci.com/pipelines/gh/kennasoft/restalize) [![codecov](https://codecov.io/gh/kennasoft/restalize/branch/master/graph/badge.svg?flag=main)](https://codecov.io/gh/kennasoft/restalize)
 
 Restalize is a robust Code generator that receives a relational database connection as input and creates a node.js-based REST api project in a specified folder.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
 
 - [Installation](#installation)
   - [Global installation](#global-installation)
@@ -77,3 +76,5 @@ Options:
        (default: "mysql")
   --help                                   display help for command
 ```
+
+The generated API reference can be found [here](../restalize-template/README.md)
