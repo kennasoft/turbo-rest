@@ -18,7 +18,7 @@ const start = async () => {
 
   await server.register(require("@hapi/inert"));
 
-  const appServer = attachRoutes(server);
+  const appServer = await attachRoutes(server);
 
   await appServer.start();
 

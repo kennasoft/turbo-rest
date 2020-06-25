@@ -13,9 +13,11 @@ server.use(cors());
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
 
-const appServer = attachRoutes(server);
+(async () => {
+  const appServer = await attachRoutes(server);
 
-appServer.listen(port, () => {
-  // if (err) throw err
-  console.log(`> Ready on http://localhost:${port}`);
-});
+  appServer.listen(port, () => {
+    // if (err) throw err
+    console.log(`> Ready on http://localhost:${port}`);
+  });
+})();
