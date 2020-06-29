@@ -22,7 +22,22 @@ export type TmgConfig = {
   skipTables?: string;
 };
 
-const makeEnvFile = (config: TmgConfig, root: string) => {
+const defaultFields: TmgConfig = {
+  host: "localhost",
+  port: "3306",
+  engine: "mysql",
+};
+
+function isDefault(conf: TmgConfig): boolean {
+  const nonDefaults = Object.keys(conf).filter((key) => {
+    return (
+      conf[key as keyof TmgConfig] !== defaultFields[key as keyof TmgConfig]
+    );
+  });
+  return nonDefaults.length > 0;
+}
+
+export const makeEnvFile = (config: TmgConfig, root: string): string => {
   let envFile = `TYPEORM_CONNECTION=${config.engine || ""}
 TYPEORM_HOST=${config.host || ""}
 TYPEORM_USERNAME=${config.user || ""}
@@ -35,6 +50,7 @@ TYPEORM_ENTITIES=./dist/lib/entities/*.js,./server/lib/entities/*.ts
 `;
 
   fs.writeFileSync(`${root}/.env`, envFile, "utf8");
+  return envFile;
 };
 
 export async function generateEntities(
@@ -45,11 +61,6 @@ export async function generateEntities(
   const args: string[] = ["typeorm-model-generator"];
   const entityPath = `${root}/server/lib`;
 
-  const defaultFields: TmgConfig = {
-    host: "localhost",
-    port: "3306",
-    engine: "mysql",
-  };
   const defaults = Object.keys(defaultFields);
 
   const allEmpty = Object.keys(config)
@@ -89,36 +100,46 @@ export async function generateEntities(
       // if process was never started, reject promise
       reject(`unable to spawn process npx with args: [${args.join(" ")}]`);
     }
+    /* istanbul ignore next */
     child.on("close", (code) => {
       if (code !== 0) {
         reject({ command: `npx ${args.join(" ")}` });
         return;
       } else {
-        try {
-          let conf: TmgConfig = Object.assign({}, config);
-          if (conf.engine !== "sqlite" && !conf.user && !conf.pass) {
-            const ormconfig = JSON.parse(
-              fs.readFileSync(`${entityPath}/ormconfig.json`, "utf8")
-            )[0];
-            conf = {
-              ...ormconfig,
-              engine: ormconfig.type,
-              user: ormconfig.username,
-              pass: ormconfig.password,
-            };
-          }
-          makeEnvFile(conf, root);
-          // remove auto-generated tsconfig
-          rimraf(`${entityPath}/tsconfig.json`, function () {});
-        } catch (exc) {
-          const errorMsg = `unable to automatically generate your .env file. Open ${chalk.green(
-            `${root}/.env`
-          )} to update with appropriate values`;
-          console.log(errorMsg);
-          reject(errorMsg);
-        }
+        postProcess(config, entityPath, root, reject);
       }
       resolve();
     });
   });
+}
+
+export function postProcess(
+  config: TmgConfig,
+  entityPath: string,
+  root: string,
+  reject: (reason?: any) => void
+) {
+  try {
+    let conf: TmgConfig = Object.assign({}, config);
+    if (conf.engine !== "sqlite" && isDefault(conf)) {
+      const ormconfig = JSON.parse(
+        fs.readFileSync(`${entityPath}/ormconfig.json`, "utf8")
+      )[0];
+      conf = {
+        ...ormconfig,
+        engine: ormconfig.type,
+        user: ormconfig.username,
+        pass: ormconfig.password,
+      };
+    }
+    makeEnvFile(conf, root);
+    // remove auto-generated tsconfig
+    rimraf.sync(`${entityPath}/tsconfig.json`);
+  } catch (exc) {
+    const errorMsg = `unable to automatically generate your .env file. Open ${chalk.green(
+      `${root}/.env`
+    )} to update with appropriate values`;
+    console.log(errorMsg, exc);
+    reject(errorMsg);
+  }
 }

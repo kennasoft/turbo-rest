@@ -37,71 +37,77 @@ export async function changeLanguage(
       env: { ...process.env, ADBLOCK: "1", DISABLE_OPENCOLLECTIVE: "1" },
     });
 
+    if (!child.pid) {
+      // if process was never started, reject promise
+      reject(`unable to spawn process yarn with args: [build]`);
+    }
+
+    /* istanbul ignore next */
     child.on("close", (code) => {
       if (code !== 0) {
-        reject("");
+        reject(`There was an error building ${targetLang} version`);
         return;
       } else {
-        try {
-          rimraf("server", () => {
-            fs.renameSync(targetLang, "server");
-          });
-          rimraf("tsconfig.json", () => null);
-          const nodemonConfig = {
-            watch: ["server/**/*.js"],
-            ext: "js",
-            exec: "node --inspect ",
-          };
-          fs.writeFile(
-            "nodemon.json",
-            JSON.stringify(nodemonConfig, null, 2),
-            "utf8",
-            () => null
-          );
-          fs.readFile(".env", "utf8", (err, data) => {
-            if (err) {
-              reject(
-                `Failed to update .env file. Api will not be able to find entity definitions`
-              );
-            }
-            const entitiesLocation =
-              "TYPEORM_ENTITIES=./server/lib/entities/*.js";
-            const newEnv = data.replace(
-              /TYPEORM_ENTITIES=.*$/gm,
-              entitiesLocation
-            );
-            fs.writeFile(".env", newEnv, "utf8", () => null);
-          });
-          fs.readFile("package.json", "utf8", (err, data) => {
-            if (err) {
-              reject(`Failed to update package.json. Scripts may not work`);
-            }
-            const packageJSON = JSON.parse(data);
-            packageJSON.scripts = {
-              dev: "nodemon ./server/server.js",
-              start: "node ./server/server.js",
-            };
-            packageJSON.devDependencies = {
-              nodemon: packageJSON.devDependencies.nodemon,
-            };
-            fs.writeFile(
-              "package.json",
-              JSON.stringify(packageJSON, null, 2),
-              "utf8",
-              () => {
-                console.log(
-                  `${chalk.green(
-                    `Api code successfully converted to ${targetLang}`
-                  )}`
-                );
-                resolve();
-              }
-            );
-          });
-        } catch (e) {
-          reject(e);
-        }
+        updateConfigs(targetLang, reject, resolve);
       }
     });
   });
+}
+
+export function updateConfigs(
+  targetLang: string,
+  reject: (reason?: any) => void,
+  resolve: (
+    value?: string | void | PromiseLike<string | void> | undefined
+  ) => void
+) {
+  try {
+    rimraf.sync("server");
+    fs.renameSync(targetLang, "server");
+    rimraf.sync("tsconfig.json");
+    const nodemonConfig = {
+      watch: ["server/**/*.js"],
+      ext: "js",
+      exec: "node --inspect ",
+    };
+    fs.writeFileSync(
+      "nodemon.json",
+      JSON.stringify(nodemonConfig, null, 2),
+      "utf8"
+    );
+    try {
+      const data = fs.readFileSync(".env", "utf8");
+      const entitiesLocation = "TYPEORM_ENTITIES=./server/lib/entities/*.js";
+      const newEnv = data.replace(/TYPEORM_ENTITIES=.*$/gm, entitiesLocation);
+      fs.writeFileSync(".env", newEnv, "utf8");
+    } catch (err) {
+      reject(
+        `Failed to update .env file. Api will not be able to find entity definitions`
+      );
+    }
+    try {
+      const data = fs.readFileSync("package.json", "utf8");
+      const packageJSON = JSON.parse(data);
+      packageJSON.scripts = {
+        dev: "nodemon ./server/server.js",
+        start: "node ./server/server.js",
+      };
+      packageJSON.devDependencies = {
+        nodemon: packageJSON.devDependencies.nodemon,
+      };
+      fs.writeFileSync(
+        "package.json",
+        JSON.stringify(packageJSON, null, 2),
+        "utf8"
+      );
+      console.log(
+        `${chalk.green(`Api code successfully converted to ${targetLang}`)}`
+      );
+      resolve();
+    } catch (err) {
+      reject(`Failed to update package.json. Scripts may not work`);
+    }
+  } catch (e) {
+    reject(e);
+  }
 }

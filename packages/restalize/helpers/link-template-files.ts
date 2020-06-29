@@ -23,15 +23,17 @@ export default async function linkTemplateFiles(
     if (fs.existsSync(typeormTemplateRoot)) {
       return resolve();
     }
-    fs.symlink(templateModuleRoot, typeormTemplateRoot, (err) => {
-      if (err) {
-        reject(err.message);
-        return err.message;
-      }
+    try {
+      fs.symlinkSync(templateModuleRoot, typeormTemplateRoot);
       console.log(`template files symlinked at "${typeormTemplateRoot}"`);
       return resolve();
-    });
+    } catch (err) {
+      reject(err.message);
+      return err.message;
+    }
   });
 }
 
-linkTemplateFiles("").then((err) => console.error(err));
+if (process.argv?.[2] === "run") {
+  linkTemplateFiles("").then((err) => console.error(err));
+}

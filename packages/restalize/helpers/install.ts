@@ -2,6 +2,7 @@
  Thanks to next.js team for this utility
  https://github.com/zeit/next.js/blob/master/packages/create-next-app/helpers/install.ts
  */
+/* istanbul ignore file */
 import chalk from "chalk";
 import spawn from "cross-spawn";
 
