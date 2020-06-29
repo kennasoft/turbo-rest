@@ -7,7 +7,7 @@ const { execSync, exec } = require("child_process");
 
 // first link template folder
 console.log("Linking template files from restalize-template...");
-execSync("node_modules/.bin/ts-node helpers/link-template-files", {
+execSync("node_modules/.bin/ts-node helpers/link-template-files run", {
   stdio: "inherit",
 });
 console.log();

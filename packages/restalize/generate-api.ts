@@ -50,8 +50,8 @@ export async function generateApi({
   httpServer,
 }: GenerateApiConfig): Promise<void> {
   if (!appPath) {
+    console.error("You must specify a project folder to Proceed. Aborting...");
     return process.exit(EXIT_CODES.NO_APP_PATH_SPECIFIED);
-    // throw new Error(`You must specify a project folder to Proceed`);
   }
   const root = path.resolve(appPath as string);
   const appName = path.basename(root);
@@ -64,14 +64,19 @@ export async function generateApi({
   } catch (err) {
     // if unable to create project dir, exit
     console.error(
-      `${chalk.red(
-        "Unable to create project dir at ${root}. Stopping installation..."
-      )}`
+      chalk.red(
+        `Unable to create project dir at ${root}. Stopping installation...`
+      )
     );
     return process.exit(EXIT_CODES.PROJECT_DIRECTORY_ACCESS_DENIED);
   }
 
   if (!isFolderEmpty(root, appName)) {
+    console.error(
+      chalk.red(
+        "Project folder must be empty. Please select another folder and try again. Aborting..."
+      )
+    );
     return process.exit(EXIT_CODES.PROJECT_FOLDER_NOT_EMPTY);
   }
 
@@ -159,9 +164,9 @@ export async function generateApi({
 
   // remove unnecessary files
   if (httpServer === "express") {
-    rimraf(`${root}/server/server.hapi.ts`, noop);
-    rimraf(`${root}/server/routes.hapi.ts`, noop);
-    rimraf(`${root}/server/lib/controllers/api/hapi.ts`, noop);
+    rimraf.sync(`${root}/server/server.hapi.ts`);
+    rimraf.sync(`${root}/server/routes.hapi.ts`);
+    rimraf.sync(`${root}/server/lib/controllers/api/hapi.ts`);
   } else {
     try {
       fs.renameSync(
