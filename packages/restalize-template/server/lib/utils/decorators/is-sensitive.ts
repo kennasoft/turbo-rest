@@ -4,7 +4,7 @@ export type IsSensitiveOptions = {
    * the sensitive value
    * @type {number}
    */
-  maskLength?: number;
+  maskLength: number;
 };
 
 /**
@@ -20,6 +20,11 @@ export function IsSensitive(
   options = { maskLength: 15 } as IsSensitiveOptions
 ) {
   return function (target: any, key: string | symbol) {
+    if (options.maskLength < 1) {
+      throw new Error(
+        "@IsSensitive Decorator: maskLength should be an integer greater than zero"
+      );
+    }
     let val = target[key];
 
     const descriptor = {
