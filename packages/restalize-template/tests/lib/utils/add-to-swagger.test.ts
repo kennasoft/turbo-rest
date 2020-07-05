@@ -122,7 +122,7 @@ describe("swagger utils", () => {
           expect(persistedSwagger.tags.length).toBe(1);
           expect(persistedSwagger.tags[0].name).toBe("Pet");
           expect(persistedSwagger.tags[0].description).toBe(
-            "Access to all Pets"
+            "Access to all Pet endpoints"
           );
         });
       });

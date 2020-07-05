@@ -4,6 +4,8 @@ import Manager from "./manager";
 export type ApiListResponse<Entity> = {
   total: number;
   subtotal: number;
+  currentPage?: number;
+  totalPages?: number;
   rows: Entity[];
 };
 
@@ -89,16 +91,19 @@ export default class ModelFetcher<Entity> extends Manager<Entity> {
     return db
       .getRepository(this.type)
       .findAndCount(queryFilters)
-      .then((listOfItems: any[]) => {
-        const resp = {
-          total: listOfItems[1],
+      .then((listOfItems: [Entity[], number]) => {
+        const resp: ApiListResponse<Entity> = {
           subtotal: 0,
+          total: listOfItems?.[1] || 0,
+          currentPage: page,
+          totalPages: 0,
           rows: listOfItems[0].map(
             (raw: Partial<Entity>) => new this.type(raw)
           ),
         };
-        if (listOfItems[1]) {
+        if (resp.total) {
           resp.subtotal = resp.rows.length;
+          resp.totalPages = Math.ceil(resp.total / page);
         }
         return resp;
       })
