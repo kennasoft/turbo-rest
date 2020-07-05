@@ -168,6 +168,16 @@ export default async function addToSwagger<Entity>(
             description: "Number of items returned based on _pageSize_ param",
             example: 20,
           },
+          currentPage: {
+            type: "integer",
+            description: "Current page number in the result set",
+            example: 5,
+          },
+          totalPages: {
+            type: "integer",
+            description: "Total pages in the result set",
+            example: 40,
+          },
           rows: {
             type: "array",
             items: {
@@ -203,7 +213,7 @@ export default async function addToSwagger<Entity>(
   }
   swaggerJSON.tags.push({
     name: entity.name,
-    description: `Access to all ${pluralize(entity.name)}`,
+    description: `Access to all ${pluralize(entity.name, 1)} endpoints`,
   });
 
   const orderAndPagination = [
@@ -214,6 +224,7 @@ export default async function addToSwagger<Entity>(
       description:
         "comma-separated list of fields to be returned in the results.",
       type: "string",
+      example: "id,name,category,tags",
     },
     {
       name: "_orderBy_",
@@ -222,6 +233,7 @@ export default async function addToSwagger<Entity>(
       description:
         "specify a field to sort the results by, and the sort order. E.g. email.DESC",
       type: "string",
+      example: "email.DESC",
     },
     {
       name: "_page_",
@@ -230,6 +242,7 @@ export default async function addToSwagger<Entity>(
       description:
         "specify page number of results. Combines with _pageSize_ to get offset",
       type: "number",
+      example: 3,
     },
     {
       name: "_pageSize_",
@@ -237,6 +250,7 @@ export default async function addToSwagger<Entity>(
       required: false,
       description: "specify number of records to return per page.",
       type: "number",
+      example: 20,
     },
   ];
 
