@@ -1,6 +1,6 @@
 {
   "name": "restalize",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "description": "Robust REST API generator. Generates a full typescript express-js REST API project from just a relational database connection",
   "main": "index.js",
   "repository": {
@@ -28,9 +28,9 @@
     "test:watch": "yarn test --watch",
     "start": "rimraf ./output && yarn build && npx ./dist/index.js",
     "deploy": "yarn release && yarn pack && npm publish restalize-v$npm_package_version.tgz",
-    "version:patch": "yarn version --patch",
-    "version:minor": "yarn version --minor",
-    "version:major": "yarn version --major"
+    "version:patch": "yarn version --patch --no-git-tag-version",
+    "version:minor": "yarn version --minor --no-git-tag-version",
+    "version:major": "yarn version --major --no-git-tag-version"
   },
   "author": "Ikenna Okonkwo<ikenna.okonkwo@gmail.com>",
   "license": "MIT",
