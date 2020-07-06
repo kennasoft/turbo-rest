@@ -1,6 +1,6 @@
 {
   "name": "root",
-  "version": "1.1.7",
+  "version": "1.1.10",
   "private": true,
   "repository": {
     "type": "git",
@@ -29,9 +29,9 @@
     "build-t": "cd packages/restalize-template && yarn build",
     "build-r": "cd packages/restalize && yarn build",
     "deploy": "lerna run deploy",
-    "version:patch": "lerna run version:patch",
-    "version:minor": "lerna run version:minor",
-    "version:major": "lerna run version:major",
+    "version:patch": "yarn version --patch && lerna run version:patch",
+    "version:minor": "yarn version --minor && lerna run version:minor",
+    "version:major": "yarn version --major && lerna run version:major",
     "dev-r": "cd packages/restalize && yarn dev",
     "dev-t": "cd packages/restalize-template && yarn dev"
   },
