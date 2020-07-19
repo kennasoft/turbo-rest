@@ -27,6 +27,36 @@ describe("ModelFetcher", () => {
     expect(pet.name).toMatch(/Fuzzy.*/);
   });
 
+  it("should fetch only fields specified in _select_ param", async () => {
+    const pet = await fetcher.fetch({ id: 1, _select_: "id,name,status" });
+    expect(Object.keys(pet)).toEqual(["id", "name", "status"]);
+  });
+
+  it("should fetch relation specified in _select_ param", async () => {
+    const pet = await fetcher.fetch({
+      id: 1,
+      _select_: "id,name,category,tags",
+    });
+    expect(pet.tags?.length).toBeTruthy();
+    expect(pet.category?.id).toBeTruthy();
+    expect(pet.category?.name).toContain("cat");
+  });
+
+  it("should fetch only fields specified for relations in _select_ param", async () => {
+    const pet = await fetcher.fetch({
+      id: 1,
+      _select_: "id,name,category(id|name|createdAt),tags(name)",
+    });
+    expect(Object.keys(pet.category || {})).toEqual([
+      "id",
+      "name",
+      "createdAt",
+    ]);
+    expect(Object.keys(pet?.tags?.[0] || {})).toEqual(["name"]);
+    expect(pet.category?.updatedAt).toBeUndefined();
+    expect(pet.category?.pets).toBeUndefined();
+  });
+
   it("should fetch a list of entities", async () => {
     const result = await fetcher.list();
     expect(result.total).toEqual(5);
