@@ -77,4 +77,4 @@ Options:
   --help                                   display help for command
 ```
 
-The generated API reference can be found [here](../restalize-template/README.md)
+The generated API reference can be found [here](https://github.com/kennasoft/restalize/blob/master/packages/restalize-template/README.md)
