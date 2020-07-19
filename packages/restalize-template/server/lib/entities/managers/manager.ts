@@ -12,13 +12,23 @@ import {
   Not,
   Equal,
   IsNull,
-  ObjectType,
 } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
 import dbConn from "../../utils/db";
 import { intTypes, floatTypes, dateTypes } from "../../utils/type-mappings";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
+
+export type RelationFragment = {
+  name: string;
+  select: string[];
+};
+
+export type FilterAttributes = {
+  select?: string[];
+  relations: string[];
+  relationFragments: RelationFragment[];
+};
 
 export default class Manager<Entity> {
   connect: Promise<Connection>;
@@ -67,11 +77,25 @@ export default class Manager<Entity> {
     }
   }
 
-  _pickAttributes(attribs: string | string[], conn: Connection) {
+  _pickAttributes(
+    attribs: string | string[],
+    conn: Connection
+  ): FilterAttributes | undefined {
     if (attribs) {
       if (typeof attribs === "string") {
         attribs = attribs.split(",");
       }
+      const relationFragments = attribs
+        .filter((attrib) => /\(.+\)/.test(attrib))
+        .map((rel) => {
+          const [_, relName, fields] = rel.match(
+            /(.+)\((.+)\)/
+          ) as RegExpMatchArray;
+          return {
+            name: relName,
+            select: fields.split("|"),
+          };
+        });
       const metadata = conn.getMetadata(this.type);
       const validColumns = metadata.columns.map(
         (col: ColumnMetadata) => col.propertyName
@@ -87,7 +111,11 @@ export default class Manager<Entity> {
       let nestedRelations = attribs.filter((attr) => attr.indexOf(".") > -1);
       if (relationNames.length) {
         relations = relationNames
-          .filter((rel) => attribs.includes(rel))
+          .filter(
+            (rel) =>
+              attribs.includes(rel) ||
+              relationFragments.map((pr) => pr.name).includes(rel)
+          )
           .concat(nestedRelations);
       }
       const id = metadata.primaryColumns[0].propertyName;
@@ -101,7 +129,7 @@ export default class Manager<Entity> {
       if (select.length === 0) {
         select = undefined;
       }
-      return { select, relations };
+      return { select, relations, relationFragments };
     }
   }
 
