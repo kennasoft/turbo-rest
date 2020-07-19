@@ -69,6 +69,8 @@ will result in the following output:
   "data": {
     "total": 5,
     "subtotal": 5,
+    "currentPage": 1,
+    "totalPages": 1,
     "rows": [
       {
         "name": "FuzzyCat",
