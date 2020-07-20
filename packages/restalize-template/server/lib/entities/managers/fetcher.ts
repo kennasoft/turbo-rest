@@ -1,5 +1,6 @@
 import { Connection, ObjectType } from "typeorm";
-import Manager from "./manager";
+import pick from "lodash.pick";
+import Manager, { RelationFragment } from "./manager";
 
 export type ApiListResponse<Entity> = {
   total: number;
@@ -30,10 +31,30 @@ export default class ModelFetcher<Entity> extends Manager<Entity> {
     return db
       .getRepository(this.type)
       .findOne(queryFilters)
-      .then((obj: any) => new this.type(obj))
+      .then((obj: any) => {
+        const newObj = this.restructureRelations(
+          obj,
+          queryFilters.relationFragments
+        );
+        return new this.type(newObj);
+      })
       .catch((err: Error) => {
         throw err;
       });
+  }
+
+  private restructureRelations(obj: any, partialRelations: RelationFragment[]) {
+    const newObj = { ...obj };
+    partialRelations?.forEach((prel: RelationFragment) => {
+      if (Array.isArray(newObj[prel.name])) {
+        newObj[prel.name] = newObj[prel.name].map((val: any) =>
+          pick(val, prel.select)
+        );
+      } else {
+        newObj[prel.name] = pick(newObj[prel.name], prel.select);
+      }
+    });
+    return newObj;
   }
 
   async count(params = {} as Record<string, any>): Promise<number | void> {
@@ -80,10 +101,10 @@ export default class ModelFetcher<Entity> extends Manager<Entity> {
     }
     queryFilters.where = this._buildWhereClause(params, db);
     if (params._select_) {
-      queryFilters = Object.assign(
-        queryFilters,
-        this._pickAttributes(params._select_, db)
-      );
+      queryFilters = {
+        ...queryFilters,
+        ...this._pickAttributes(params._select_, db),
+      };
     }
 
     // console.log(queryFilters);
@@ -97,9 +118,11 @@ export default class ModelFetcher<Entity> extends Manager<Entity> {
           total: listOfItems?.[1] || 0,
           currentPage: page,
           totalPages: 0,
-          rows: listOfItems[0].map(
-            (raw: Partial<Entity>) => new this.type(raw)
-          ),
+          rows: listOfItems[0].map((raw: Partial<Entity>) => {
+            return new this.type(
+              this.restructureRelations(raw, queryFilters.relationFragments)
+            );
+          }),
         };
         if (resp.total) {
           resp.subtotal = resp.rows.length;

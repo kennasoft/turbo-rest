@@ -83,6 +83,24 @@ describe("Manager", () => {
       expect(result?.select?.includes("unknown")).toBeFalsy();
       expect(result?.relations?.includes("unknown")).toBeFalsy();
     });
+
+    it("should be able to handle relations with select fields", async () => {
+      const result = manager._pickAttributes(
+        ["id", "name", "category(id|name)", "tags(name|updatedAt)"],
+        dbConn
+      );
+      expect(result?.relationFragments).toBeTruthy();
+      const categoryRef = result?.relationFragments.find(
+        (ref) => ref.name === "category"
+      );
+      expect(categoryRef).toBeTruthy();
+      const tagsRef = result?.relationFragments.find(
+        (ref) => ref.name === "tags"
+      );
+      expect(tagsRef).toBeTruthy();
+      expect(tagsRef?.select.includes("name")).toBeTruthy();
+      expect(categoryRef?.select.includes("id")).toBeTruthy();
+    });
   });
 
   describe("_buildWhereClause()", () => {
