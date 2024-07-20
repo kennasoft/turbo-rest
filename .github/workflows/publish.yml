@@ -17,6 +17,16 @@ jobs:
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org
+      - name: install restalize packages
+        working-directory: ./packages/restalize
+        run: yarn
+        env:
+          NODE_ENV: development
+      - name: install restalize-template packages
+        working-directory: ./packages/restalize-template
+        run: yarn
+        env:
+          NODE_ENV: development
       - name: 🧪 test
         run: yarn test
       - name: 🚀 publish
